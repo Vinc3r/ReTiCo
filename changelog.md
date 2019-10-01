@@ -1,5 +1,34 @@
 # Nothing-is-3D tools changelog
 
+## [v1.2.0](#)
+
+*WIP*
+
+### Misc
+
+- converted for Blender 2.8
+- the stats/polycount part is [now an independant addon](https://github.com/Vinc3r/Polycount)
+
+### glTF workflow
+
+- mute by texture type
+- fix materials to match glTF norm
+
+### Materials
+
+- backface culling on/off
+- select active texture node type (for viewport devlook mode)
+
+### Meshes
+
+- copy object name to mesh
+- mass-overwrite autosmooth
+
+### UVs
+
+- do a box mapping but using MagicUV algorythm (much efficient than default one)
+- report meshes without UVs
+
 
 ## [v1.0.0](https://github.com/Vinc3r/BlenderScripts/releases/tag/v1.0.0)
 
