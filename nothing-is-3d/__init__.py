@@ -5,7 +5,7 @@ bl_info = {
     "category": "Object",
     "wiki_url": 'https://github.com/Vinc3r/BlenderScripts',
     "tracker_url": 'https://github.com/Vinc3r/BlenderScripts/issues',
-    "version": (1, 2, 0),
+    "version": (1, 2, 1),
     "blender": (2, 80, 0)
 }
 

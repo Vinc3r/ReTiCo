@@ -1,13 +1,14 @@
 # Nothing-is-3D tools changelog
 
-## [v1.2.0](#)
+## [v1.2.1](https://github.com/Vinc3r/BlenderScripts/releases/tag/v1.2.1)
 
-*WIP*
+- the stats/polycount part is [now an independant addon](https://github.com/Vinc3r/Polycount)
+
+## [v1.2.0](https://github.com/Vinc3r/BlenderScripts/releases/tag/v1.2.0)
 
 ### Misc
 
 - converted for Blender 2.8
-- the stats/polycount part is [now an independant addon](https://github.com/Vinc3r/Polycount)
 
 ### glTF workflow
 
