@@ -3,7 +3,7 @@ bl_info = {
     "description": "Some scripts 3D realtime workflow oriented.",
     "author": "Vincent (V!nc3r) Lamy",
     "category": "Object",
-    "wiki_url": 'https://github.com/Vinc3r/BlenderScripts',
+    "wiki_url": 'https://github.com/Vinc3r/BlenderScripts#nothing-is-3d-tools',
     "tracker_url": 'https://github.com/Vinc3r/BlenderScripts/issues',
     "version": (1, 2, 1),
     "blender": (2, 80, 0)

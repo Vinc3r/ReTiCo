@@ -2,80 +2,50 @@
 
 A Blender add-on made to work faster, often oriented 3D realtime workflow.
 
-**-- currently updating code for Blender 2.8, still not available in zip, but usable from /nothing-is-3d/ folder --**
+[Changelog](https://github.com/Vinc3r/BlenderScripts/blob/master/changelog.md).
 
-** DOC is outdated **
+![blender2.8-ui](_readmeAssets_/blender2.8-ui.png)
 
-- Download or update the addon from the [release page](https://github.com/Vinc3r/BlenderScripts/releases/).
+## Installation
 
-- Changelog [available here](https://github.com/Vinc3r/BlenderScripts/blob/master/changelog.md).
-
-- You can also find some [snippets](https://github.com/Vinc3r/BlenderScripts/tree/master/snippets), supposed to be merged on the main add-on later (and then deleted), or not.
-
-- You can make feedbacks by creating a [github issue](https://github.com/Vinc3r/BlenderScripts/issues), or contact me through [my website](https://www.nothing-is-3d.com/contact) or even [Twitter](https://twitter.com/Vinc3r).
-
-**Table of content**
-
-1. <a href="#main-features">Main Features</a>
-2. <a href="#installation">Installation</a>
-3. <a href="#usage">Usage</a>
-    1. <a href="#usage-meshes">Meshes part</a>  
-    2. <a href="#usage-materials">Materials part</a>  
-    3. <a href="#usage-stats">Stats part</a>
-    
-## [Main Features](#main-features)
-
-- quick switch to activate UV1 & UV2 on selected objects
-- clean FBX imported materials (only on Blender Render for now)
-- get stats about objects polycount
-
-## [Installation](#installation)
-
-1. download [nothing-is-3d tools](https://github.com/Vinc3r/BlenderScripts/releases/)
-
+1. download [last version](https://github.com/Vinc3r/BlenderScripts/releases/latest)
 2. in Blender go to *File* > *User Preferences* > *Add-ons* Tab
-
 3. remove previous installation if needed (search *nothing* to easily find it)
-
 4. install by using *Install from File...* in *Blender User Preferences* > *Add-ons* tab
 
-Tools will be placed on:
-- Tools panel of 3DView, in *Nthg is 3D* tab.
-- Scene panel in Properties, in *Stats* panel
+Nothing-is-3D tools are now available in `3DView` > `Sidebar` > `Nothing-is-3D` tab.
 
-## [Usage](#usage)
+## Features
 
-By default, tools are applied on selected objects.
+This addon was made to help using a 3D realtime workflow, and so glTF export.
 
-### [*Meshes* part](#usage-meshes)
+- <a href="#gltf">glTF</a> panel
+- <a href="#materials">Materials</a> panel
+- <a href="#meshes">Meshes</a> panel
+- <a href="#uvs">UVs</a> panel
 
-#### UV channels
+### [*glTF* panel](#gltf)
 
-- **Select** allow to quickly switch active UV. Usefull when you're in Material shading viewport
-- **Rename channels** rename first channel to *UVMap*, second to *UV2*, third to UV3, etc. Usefull when importing meshes from other 3D softwares.
+On selected objects:
+  - mute texture node by type (useful when baking lighting)
+  - help fixing some common potential issues
 
-<img src="https://raw.githubusercontent.com/Vinc3r/BlenderScripts/master/_readmeAssets_/demo-UV-chans.gif" height="280">
+### [*Material* panel](#materials)
 
----
+On selected objects:
+  - allow backface culling on/off
+  - set active texture node by type, useful for Look Dev viewport mode (albedo only for now)
 
-### [*Materials* part](#usage-materials)
+### [*Meshes* panel](#meshes)
 
-#### Import cleaner
+On selected objects:
+  - copy Object name to Mesh name
+  - mass-overwrite autosmooth
 
-*only on Blender Render for now*
+### [*UVs* panel](#uvs)
 
-- **intensity** set diffuse intensity to 1
-- **color** set color to white
-- **alpha** reset alpha params
-- **spec** set specular to black and its intensity to 1
-
-<img src="https://raw.githubusercontent.com/Vinc3r/BlenderScripts/master/_readmeAssets_/demo-reset-mtl.gif" height="280">
-
-
-
-### [*Stats* part](#usage-stats)
-
-- show **polycount** as vertices & triangles. Add **±** when nGons are found.
-- clicking on the object name make it active.
-
-<img src="https://raw.githubusercontent.com/Vinc3r/BlenderScripts/master/_readmeAssets_/demo-stats.gif" height="280">
+On selected objects:
+  - make active first or second UV channel
+  - do a box mapping but using MagicUV algorithm (better than the default one)
+  - rename channels using this pattern: `UVMap`, `UV2`, `UV3`, etc
+  - report object name with missing channels
