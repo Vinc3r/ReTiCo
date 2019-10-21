@@ -14,7 +14,6 @@ from bpy.props import (
 def meshes_names_to_clipboard():
     meshes_names_to_clipboard = ""
     objects_selected = selection_sets.meshes_in_selection()
-    print(objects_selected)
     for obj in objects_selected:
         if obj is objects_selected[-1]:
             meshes_names_to_clipboard += "{}".format(obj.name)
