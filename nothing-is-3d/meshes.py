@@ -11,6 +11,17 @@ from bpy.props import (
     StringProperty
 )
 
+def meshes_names_to_clipboard():
+    meshes_names_to_clipboard = ""
+    objects_selected = selection_sets.meshes_in_selection()
+    print(objects_selected)
+    for obj in objects_selected:
+        if obj is objects_selected[-1]:
+            meshes_names_to_clipboard += "{}".format(obj.name)
+        else:
+            meshes_names_to_clipboard += "{},".format(obj.name)
+    bpy.context.window_manager.clipboard = meshes_names_to_clipboard
+    return {'FINISHED'}
 
 def transfer_names():
     # handling active object
@@ -71,12 +82,30 @@ class NTHG3D_PT_mesh_panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        # transfer object name to mesh name
         row = layout.row()
         row.operator("nothing3d.mesh_transfer_names", text="Transfer names")
+        # overwrite autosmooth
         row = layout.row(align=True)
         row.operator("nothing3d.mesh_set_autosmooth", text="Set autosmooth")
         row.prop(context.scene, "autosmooth_angle", text="", slider=True)
+        # copy names to clipboard
+        row = layout.row()
+        row.operator("nothing3d.mesh_name_to_clipboard", text="Copy names to clipboard")
 
+
+class NTHG3D_OT_mesh_name_to_clipboard(bpy.types.Operator):
+    bl_idname = "nothing3d.mesh_name_to_clipboard"
+    bl_label = "Copy Object name to clipboard"
+    bl_description = "Copy Object name to clipboard"
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.view_layer.objects) > 0
+
+    def execute(self, context):
+        meshes_names_to_clipboard()
+        return {'FINISHED'}
 
 class NTHG3D_OT_mesh_transfer_names(bpy.types.Operator):
     bl_idname = "nothing3d.mesh_transfer_names"
@@ -110,6 +139,7 @@ classes = (
     NTHG3D_PT_mesh_panel,
     NTHG3D_OT_mesh_transfer_names,
     NTHG3D_OT_mesh_set_autosmooth,
+    NTHG3D_OT_mesh_name_to_clipboard,
 )
 
 
