@@ -5,7 +5,7 @@ bl_info = {
     "category": "Object",
     "wiki_url": 'https://github.com/Vinc3r/BlenderScripts#nothing-is-3d-tools',
     "tracker_url": 'https://github.com/Vinc3r/BlenderScripts/issues',
-    "version": (1, 2, 1),
+    "version": (2019, 10, 21),
     "blender": (2, 80, 0)
 }
 
@@ -13,6 +13,7 @@ bl_info = {
     - of course, Ton & all Blender devs,
     - Henri Hebeisen (henri-hebeisen.com), Pitiwazou (pitiwazou.com), Pistiwique (github.com/pistiwique),
     - and finally all Blender community and the ones I forget.
+    - Cstfan for his feedbacks
 """
 
 modulesNames = ['materials', 'meshes', 'selection_sets', 'uvs']

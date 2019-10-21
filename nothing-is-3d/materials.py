@@ -25,6 +25,12 @@ def set_active_texture(type="albedo"):
     # texture_condition = [node.type, node.output.type, node.output.link.to_node.type]
     # default: albedo
     texture_condition = ['TEX_IMAGE', 'RGBA', 'BSDF_PRINCIPLED']
+    if type == "orm":
+        texture_condition = ['TEX_IMAGE', 'RGBA', 'SEPRGB']
+    elif type == "normal":
+        texture_condition = ['TEX_IMAGE', 'RGBA', 'NORMAL_MAP']
+    elif type == "emit":
+        texture_condition = ['TEX_IMAGE', 'RGBA', 'EMISSION']
 
     objects_selected = selection_sets.meshes_with_materials()
 
@@ -159,10 +165,21 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
         row.operator("nothing3d.material_backface", text="Off").toogle = False
         row = box.row(align=True)
         # active texture node
-        row.label(text="Activate texture:")
-        row = box.row(align=True)
+        row.label(text="Activate texture node:")
+        grid = box.grid_flow(
+            row_major=True, even_columns=True, even_rows=True, align=True)
+        row = grid.row(align=True)
         row.operator("nothing3d.material_active_texture",
-                     text="albedo").texture_type = "albedo"
+                     text="Albedo").texture_type = "albedo"
+        row = grid.row(align=True)
+        row.operator("nothing3d.material_active_texture",
+                     text="ORM").texture_type = "orm"
+        row = grid.row(align=True)
+        row.operator("nothing3d.material_active_texture",
+                     text="Normal").texture_type = "normal"
+        row = grid.row(align=True)
+        row.operator("nothing3d.material_active_texture",
+                     text="Emissive").texture_type = "emit"
         row = layout.row()
         # glTF workflow
         row.label(text="glTF workflow:")
