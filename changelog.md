@@ -1,5 +1,10 @@
 # Nothing-is-3D tools changelog
 
+## 2019.10.21
+
+- versionning now use date (more convenient)
+- object names can be put in OS clipboard
+
 ## [v1.2.1](https://github.com/Vinc3r/BlenderScripts/releases/tag/v1.2.1)
 
 - the stats/polycount part is [now an independant addon](https://github.com/Vinc3r/Polycount)
