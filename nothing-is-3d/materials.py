@@ -72,11 +72,13 @@ def gltf_fix_colorspace():
                             # output have to pass test
                             continue
                         for link in out.links:
-                            if link.to_node.type == 'BSDF_PRINCIPLED':
+                            if link.to_node.type == 'BSDF_PRINCIPLED' or \
+                                    link.to_node.type == 'EMISSION':
                                 node.image.colorspace_settings.name = 'sRGB'
                             else:
                                 node.image.colorspace_settings.name = 'Non-Color'
     return {'FINISHED'}
+
 
 def gltf_fix_uvnode_naming(operator):
     objects_selected = selection_sets.meshes_with_materials()
@@ -94,14 +96,16 @@ def gltf_fix_uvnode_naming(operator):
                     # get gltf UV chan id: "TEXCOORD_0" give us "0" as int
                     channel_number = str(node.uv_map)[-1:]
                     try:
-                        node.uv_map = obj.data.uv_layers[int(channel_number)].name
+                        node.uv_map = obj.data.uv_layers[int(
+                            channel_number)].name
                     except:
                         naming_issue = True
                 if naming_issue:
                     materials_error += "{}, ".format(mat.name)
     if materials_error != "":
         # removing ", " charz
-        operator.report({'WARNING'}, "Can't be parsed: {}".format(materials_error[:-2]))
+        operator.report(
+            {'WARNING'}, "Can't be parsed: {}".format(materials_error[:-2]))
     return {'FINISHED'}
 
 
@@ -213,7 +217,7 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
         row = box.row()
         row.label(text="Fix:")
         grid = box.grid_flow(
-            row_major=True, columns = 2, even_columns=True, even_rows=True, align=True)
+            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("nothing3d.material_gltf_colorspace", text="Colorspace")
         row = grid.row(align=True)
@@ -241,6 +245,7 @@ class NTHG3D_OT_material_gltf_mute(bpy.types.Operator):
         gltf_mute_textures(self.exclude)
         return {'FINISHED'}
 
+
 class NTHG3D_OT_material_gltf_colorspace(bpy.types.Operator):
     bl_idname = "nothing3d.material_gltf_colorspace"
     bl_label = "Fix gltf textures colorspace"
@@ -249,6 +254,7 @@ class NTHG3D_OT_material_gltf_colorspace(bpy.types.Operator):
     def execute(self, context):
         gltf_fix_colorspace()
         return {'FINISHED'}
+
 
 class NTHG3D_OT_material_gltf_uvnode_naming(bpy.types.Operator):
     bl_idname = "nothing3d.material_gltf_uvnode_naming"
