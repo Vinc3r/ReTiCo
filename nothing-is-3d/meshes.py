@@ -16,9 +16,9 @@ def meshes_names_to_clipboard():
     objects_selected = selection_sets.meshes_in_selection()
     for obj in objects_selected:
         if obj is objects_selected[-1]:
-            meshes_names_to_clipboard += "{}".format(obj.name)
+            meshes_names_to_clipboard += '"{}"'.format(obj.name)
         else:
-            meshes_names_to_clipboard += "{},".format(obj.name)
+            meshes_names_to_clipboard += '"{},"'.format(obj.name)
     bpy.context.window_manager.clipboard = meshes_names_to_clipboard
     return {'FINISHED'}
 
