@@ -296,8 +296,7 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
         row.operator("nothing3d.material_gltf_uvnode_naming", text="UV nodes")
         # report
         row = layout.row(align=True)
-        row.label(text="Report:")
-        row = layout.row(align=True)
+        row.label(text="Report: ")
         row.operator("nothing3d.material_report_none", text="no Mat")
 
 

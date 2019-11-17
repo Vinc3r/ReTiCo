@@ -8,3 +8,4 @@ Current changes in [source folder](https://github.com/Vinc3r/BlenderScripts/tree
 - ability to names material using object names and material id with *objName*.*id*.000 pattern
 - report objects without materials and/or object with empty material indexess
 - fixed: emissive texture node no longer set as linear but sRGB
+- fixed: Box mapping in Edit mode only applied on selected faces

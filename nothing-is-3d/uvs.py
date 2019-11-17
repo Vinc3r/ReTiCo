@@ -77,7 +77,6 @@ def box_mapping(size=1.0):
     if bpy.context.view_layer.objects.active.mode == 'EDIT':
         is_user_in_edit_mode = True
 
-    bpy.ops.object.mode_set(mode='OBJECT')
     for obj in objects_selected:
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.context.view_layer.objects.active = obj
@@ -86,17 +85,17 @@ def box_mapping(size=1.0):
             continue
         mesh.uv_layers[0].active = True
         bpy.ops.object.mode_set(mode='EDIT')
-        mesh_box_mapping(mesh, size)
-        bpy.ops.object.mode_set(mode='OBJECT')
+        mesh_box_mapping(mesh, size, is_user_in_edit_mode)
 
+    bpy.ops.object.mode_set(mode='OBJECT')
     bpy.context.view_layer.objects.active = user_active
-    if not is_user_in_edit_mode:
-        bpy.ops.object.mode_set(mode='OBJECT')
+    if is_user_in_edit_mode:
+        bpy.ops.object.mode_set(mode='EDIT')
 
     return {'FINISHED'}
 
 
-def mesh_box_mapping(mesh, size=1.0):
+def mesh_box_mapping(mesh, size=1.0, only_selected=False):
     """ This function is shamefully copy-pasted from MagicUV addon (UVW function)
         and rudely adapt for my needs.
     """
@@ -121,8 +120,12 @@ def mesh_box_mapping(mesh, size=1.0):
     rz = rotation[2] * pi / 180.0
     aspect = tex_aspect
 
+    faces_to_map = bm.faces
+    if only_selected:
+        faces_to_map = [f for f in bm.faces if f.select == True]
+
     # update UV coordinate
-    for f in bm.faces:
+    for f in faces_to_map:
         n = f.normal
         for l in f.loops:
             co = l.vert.co
