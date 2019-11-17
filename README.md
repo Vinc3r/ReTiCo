@@ -1,8 +1,8 @@
-# Nothing-is-3D Tools
+# ReTiCo
 
-A Blender add-on made to work faster, often oriented 3D realtime workflow.
+**Re**al**Ti**me**Co**mpanion, a Blender add-on made to work faster, oriented 3D realtime workflow.
 
-[Changelog](https://github.com/Vinc3r/BlenderScripts/blob/master/changelog.md).
+[Changelog](https://github.com/Vinc3r/ReTiCo/blob/master/changelog.md).
 
 ![blender2.8-ui](_readmeAssets_/blender2.8-ui.png)
 
@@ -10,10 +10,10 @@ A Blender add-on made to work faster, often oriented 3D realtime workflow.
 
 1. download [last version](https://github.com/Vinc3r/BlenderScripts/releases/latest)
 2. in Blender go to *File* > *User Preferences* > *Add-ons* Tab
-3. remove previous installation if needed (search *nothing* to easily find it)
+3. remove previous installation if needed (search *retico* to easily find it)
 4. install by using *Install from File...* in *Blender User Preferences* > *Add-ons* tab
 
-Nothing-is-3D tools are now available in `3DView` > `Sidebar` > `Nothing-is-3D` tab.
+ReTiCo tools are now available in `3DView` > `Sidebar` > `ReTiCo` tab.
 
 ## Features
 
