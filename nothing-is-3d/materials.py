@@ -177,6 +177,47 @@ def gltf_mute_textures(exclude="albedo"):
     return {'FINISHED'}
 
 
+def report_no_materials():
+    objects_without_mtl = []
+    objects_without_mtl_name = ""
+    message_without_mtl = ""
+    objects_index_without_mtl = []
+    objects_index_without_mtl_name = ""
+    message_index = ""
+    is_all_good = False
+
+    objects_selected = selection_sets.meshes_in_selection()
+
+    for obj in objects_selected:
+        # no materials at all
+        if not obj.data.materials:
+            objects_without_mtl.append(obj)
+        # if index but without mat
+        else: 
+            object_materials = obj.data.materials
+            for index in range(len(object_materials)):
+                if object_materials[index] is None:
+                    objects_index_without_mtl.append([obj, index])
+
+    if len(objects_without_mtl) == 0 and len(objects_index_without_mtl) == 0:
+        is_all_good = True
+    else:
+        # no need to check if alright
+        if len(objects_without_mtl) > 0:
+            for obj in objects_without_mtl:
+                objects_without_mtl_name += "{}, ".format(obj.name)
+            message_without_mtl = "No materials on: {}".format(
+                objects_without_mtl_name[:-2])  # removing last ", " charz
+        # no need to check if alright
+        if len(objects_index_without_mtl) > 0:
+            for reports in objects_index_without_mtl:
+                objects_index_without_mtl_name += "{} (id {}), ".format(reports[0].name, (reports[1] + 1))
+            message_index = "Empty material indexes on: {}".format(
+                objects_index_without_mtl_name[:-2])  # removing last ", " charz
+    
+    return message_without_mtl, message_index, is_all_good
+
+
 class NTHG3D_PT_material_panel(bpy.types.Panel):
     bl_idname = "NTHG3D_PT_material_panel"
     bl_label = "Materials"
@@ -247,10 +288,17 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
         row.label(text="Fix:")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+        ## colorspace
         row = grid.row(align=True)
         row.operator("nothing3d.material_gltf_colorspace", text="Colorspace")
+        ## uv nodes
         row = grid.row(align=True)
         row.operator("nothing3d.material_gltf_uvnode_naming", text="UV nodes")
+        # report
+        row = layout.row(align=True)
+        row.label(text="Report:")
+        row = layout.row(align=True)
+        row.operator("nothing3d.material_report_none", text="no Mat")
 
 
 class NTHG3D_OT_material_backface(bpy.types.Operator):
@@ -317,6 +365,28 @@ class NTHG3D_OT_material_active_texture(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class NTHG3D_OT_material_report_none(bpy.types.Operator):
+    bl_idname = "nothing3d.material_report_none"
+    bl_label = "Report object without materials"
+    bl_description = "Report object without materials, both in console and Info editor"
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.view_layer.objects) > 0
+
+    def execute(self, context):
+        message_without_mtl, message_index, is_all_good = report_no_materials()
+        if is_all_good:
+            self.report({'INFO'}, "All meshes have materials")
+        else:
+            if len(message_without_mtl) > 0:
+                self.report({'WARNING'}, message_without_mtl)
+            if len(message_index) > 0:
+                self.report({'WARNING'}, message_index)
+
+        return {'FINISHED'}
+
+
 classes = (
     NTHG3D_PT_material_panel,
     NTHG3D_OT_material_backface,
@@ -325,6 +395,7 @@ classes = (
     NTHG3D_OT_material_active_texture,
     NTHG3D_OT_material_gltf_colorspace,
     NTHG3D_OT_material_gltf_uvnode_naming,
+    NTHG3D_OT_material_report_none,
 )
 
 

@@ -5,7 +5,7 @@ bl_info = {
     "category": "Object",
     "wiki_url": 'https://github.com/Vinc3r/BlenderScripts#nothing-is-3d-tools',
     "tracker_url": 'https://github.com/Vinc3r/BlenderScripts/issues',
-    "version": (2019, 10, 21),
+    "version": (2019, 11, 17),
     "blender": (2, 80, 0)
 }
 

@@ -43,7 +43,7 @@ def activate_uv_channels(uv_chan):
 def report_no_uv(channel=0):
     objects_no_uv = []
     obj_no_uv_names: str = ""
-    message_suffix = "no UV  on:"
+    message_suffix = "no UV on:"
     is_all_good = False
 
     if channel == 1:
@@ -176,17 +176,21 @@ class NTHG3D_PT_uv_panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        # activate
         row = layout.row(align=True)
         row.label(text="Active:")
         row.operator("nothing3d.uv_activate_channel", text="1").channel = 0
         row.operator("nothing3d.uv_activate_channel", text="2").channel = 1
+        # rename channels
+        row = layout.row(align=True)
+        row.operator("nothing3d.uv_rename_channel", text="Rename channels")
+        # box mapping
         row = layout.row(align=True)
         row.operator("nothing3d.uv_box_mapping", text="Box mapping")
         row.prop(context.scene, "box_mapping_size", text="")
+        # report
         row = layout.row(align=True)
-        row.operator("nothing3d.uv_rename_channel", text="Rename channels")
-        row = layout.row(align=True)
-        row.label(text="Report: ")
+        row.label(text="Report:")
         row.operator("nothing3d.uv_report_none", text="no UV").channel = 0
         row.operator("nothing3d.uv_report_none", text="2").channel = 1
 
