@@ -34,7 +34,14 @@ def activate_uv_channels(uv_chan):
         mesh = obj.data
         if len(mesh.uv_layers) == 0 or \
                 len(mesh.uv_layers) <= uv_chan:
-            continue
+            for index in range(uv_chan + 1):
+                # UV1 creation
+                if index == 0 and len(mesh.uv_layers) == 0:
+                    mesh.uv_layers.new()
+                # others UV, slipping existing
+                elif len(mesh.uv_layers) < (index + 1):
+                    mesh.uv_layers.new(name = "UV{}".format(uv_chan + 1))
+
         obj.data.uv_layers[uv_chan].active = True
 
     return {'FINISHED'}
@@ -82,7 +89,7 @@ def box_mapping(size=1.0):
         bpy.context.view_layer.objects.active = obj
         mesh = obj.data
         if len(mesh.uv_layers) == 0:
-            continue
+            mesh.uv_layers.new()
         mesh.uv_layers[0].active = True
         bpy.ops.object.mode_set(mode='EDIT')
         mesh_box_mapping(mesh, size, is_user_in_edit_mode)
@@ -211,7 +218,7 @@ class NTHG3D_OT_uv_activate_channel(bpy.types.Operator):
     def execute(self, context):
         message, is_all_good = report_no_uv(self.channel)
         if not is_all_good:
-            self.report({'WARNING'}, message)
+            self.report({'WARNING'}, "{}... Now fixed!".format(message))
         activate_uv_channels(self.channel)
 
         return {'FINISHED'}
@@ -229,7 +236,7 @@ class NTHG3D_OT_uv_box_mapping(bpy.types.Operator):
     def execute(self, context):
         message, is_all_good = report_no_uv(0)
         if not is_all_good:
-            self.report({'WARNING'}, message)
+            self.report({'WARNING'}, "{}... Now fixed!".format(message))
         box_mapping(context.scene.box_mapping_size)
 
         return {'FINISHED'}
