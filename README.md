@@ -1,6 +1,6 @@
 # ReTiCo
 
-**Re**al**Ti**me**Co**mpanion, a Blender add-on made to work faster, oriented 3D realtime workflow.
+**Re**al **Ti**me **Co**mpanion, a Blender add-on made to work faster, oriented 3D realtime and glTF workflow.
 
 [Changelog](https://github.com/Vinc3r/ReTiCo/blob/master/changelog.md).
 
