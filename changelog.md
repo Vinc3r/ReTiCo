@@ -2,6 +2,8 @@
 
 ## [2019.11.17](https://github.com/Vinc3r/ReTiCo/releases/tag/v2019.11.17)
 
+Please search for "nothing-is-3D" in your addons list, if exists, delete it before installation.
+
 - addon name is now **ReTiCo** for **Re**al **Ti**me **Co**mpanion
 - versionning now use date (more convenient)
 - object names can be put in OS clipboard
