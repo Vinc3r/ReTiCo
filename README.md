@@ -15,37 +15,39 @@
 
 ReTiCo tools are now available in `3DView` > `Sidebar` > `ReTiCo` tab.
 
-## Features
+## Documentation
 
 This addon was made to help using a 3D realtime workflow, and so glTF export.
 
-- <a href="#gltf">glTF</a> panel
 - <a href="#materials">Materials</a> panel
 - <a href="#meshes">Meshes</a> panel
 - <a href="#uvs">UVs</a> panel
 
-### [*glTF* panel](#gltf)
-
-On selected objects:
-  - mute texture node by type (useful when baking lighting)
-  - help fixing some common potential issues
-
 ### [*Material* panel](#materials)
 
 On selected objects:
-  - allow backface culling on/off
-  - set active texture node by type, useful for Look Dev viewport mode (albedo only for now)
+
+  - **BackFace On/Off**: toogle backface culling on materials setting, usefull in Look Dev viewport shading mode
+  - **Activate texture node**:  set active texture node by type (albedo, ORM, Normal, Emissive), useful in Solid - Texture viewport mode
+  - **Name from Object**: autoname materials using the following pattern `objName.matID.000`
+  - **Report**: help user to find common material issues
+  - glTF workflow:
+    - **Mute textures except**: disable some texture nodes, useful for texture baking
+    - **Fix**: try to detect some common issues
 
 ### [*Meshes* panel](#meshes)
 
 On selected objects:
-  - copy Object name to Mesh name
-  - mass-overwrite autosmooth
+
+  - **Transfer names**: copy Object name to Mesh name
+  - **Set autosmooth**: overwrite autosmooth value and delete custom normals
+  - **Copy names to clipboard**: as it says, send objects names to clipboard
 
 ### [*UVs* panel](#uvs)
 
 On selected objects:
-  - make active first or second UV channel
-  - do a box mapping but using MagicUV algorithm (better than the default one)
-  - rename channels using this pattern: `UVMap`, `UV2`, `UV3`, etc
-  - report object name with missing channels
+
+  - **Active**: make active first or second UV channel, create it if nonexistent
+  - **Rename channels**: using the following pattern `UVMap`, `UV2`, `UV3`, etc
+  - **Box mapping**: do a box mapping but using MagicUV algorithm (better than the default one). If user is in edit mode, only selected faces are affected
+  - **Repot**: give info about objects with missing channels

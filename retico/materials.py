@@ -254,12 +254,16 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         # transfer name
         row = box.row(align=True)
         row.operator("retico.material_transfer_names", text="Name from Object")
-        row = layout.row()
+        # report
+        row = box.row(align=True)
+        row.label(text="Report: ")
+        row.operator("retico.material_report_none", text="no Mat")
         # glTF workflow
+        row = layout.row()
         row.label(text="glTF workflow:")
         box = layout.box()
         row = box.row()
-        # muting textures
+        ## muting textures
         row.label(text="Mute textures except:")
         grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
@@ -283,21 +287,17 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
                      text="Unmute all").exclude = "unmute"
-        # fixing
+        ## fixing
         row = box.row()
         row.label(text="Fix:")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
-        ## colorspace
+        ### colorspace
         row = grid.row(align=True)
         row.operator("retico.material_gltf_colorspace", text="Colorspace")
-        ## uv nodes
+        ### uv nodes
         row = grid.row(align=True)
         row.operator("retico.material_gltf_uvnode_naming", text="UV nodes")
-        # report
-        row = layout.row(align=True)
-        row.label(text="Report: ")
-        row.operator("retico.material_report_none", text="no Mat")
 
 
 class RETICO_OT_material_backface(bpy.types.Operator):
