@@ -56,11 +56,7 @@ def set_active_texture(type="albedo"):
     return {'FINISHED'}
 
 
-def transfer_names():
-    obj_no_map_names: str = ""
-    message = ""
-    is_all_good = True
-    
+def transfer_names():    
     # handling active object
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
@@ -71,19 +67,12 @@ def transfer_names():
     # function core
     objects_selected = selection_sets.meshes_in_selection()
     for obj in objects_selected:
-        if bpy.context.object.material_slots.values():
+        object_materials = obj.data.materials
+        if len(object_materials) > 0:
             bpy.context.view_layer.objects.active = obj
-            mesh = obj.name   
-            mat_slot0 = bpy.context.object.material_slots[0].name
-            bpy.data.materials[mat_slot0].name = mesh
-        else:
-            obj_no_map_names += "{}, ".format(obj.name)
-            message_suffix = "Add material on:"
-            message = "{} {}".format(message_suffix, obj_no_map_names)
-            is_all_good = False
-
-    return message[:-2], is_all_good
-            
+            for index in range(len(object_materials)):
+                if object_materials[index] is not None:
+                    object_materials[index].name = "{}.{:02}.000".format(obj.name, (index + 1))
 
     # handling active object
     bpy.context.view_layer.objects.active = user_active
@@ -221,9 +210,9 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
         row = grid.row(align=True)
         row.operator("nothing3d.material_active_texture",
                      text="Emissive").texture_type = "emit"
-        # row = grid.row(align=True)
-        row = layout.row()
-        row.operator("nothing3d.material_transfer_names", text="Transfer names")
+        # transfer name
+        row = box.row(align=True)
+        row.operator("nothing3d.material_transfer_names", text="Name from Object")
         row = layout.row()
         # glTF workflow
         row.label(text="glTF workflow:")
@@ -278,13 +267,13 @@ class NTHG3D_OT_material_transfer_names(bpy.types.Operator):
     bl_idname = "nothing3d.material_transfer_names"
     bl_label = "Copy Object name to its material name"
     bl_description = "Copy Object name to its material name"
-    exclude: StringProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message, is_all_good = transfer_names()
-        if not is_all_good:
-            self.report({'WARNING'}, message)
-
+        transfer_names()
         return {'FINISHED'}
 
 class NTHG3D_OT_material_gltf_mute(bpy.types.Operator):
