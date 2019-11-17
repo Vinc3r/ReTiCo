@@ -177,36 +177,36 @@ def mesh_box_mapping(mesh, size=1.0, only_selected=False):
     bm.free()
 
 
-class NTHG3D_PT_uv_panel(bpy.types.Panel):
+class RETICO_PT_uv_panel(bpy.types.Panel):
     bl_label = "UVs"
-    bl_idname = "NTHG3D_PT_uv_panel"
+    bl_idname = "RETICO_PT_uv_panel"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Nothing-is-3D"
+    bl_category = "ReTiCo"
 
     def draw(self, context):
         layout = self.layout
         # activate
         row = layout.row(align=True)
         row.label(text="Active:")
-        row.operator("nothing3d.uv_activate_channel", text="1").channel = 0
-        row.operator("nothing3d.uv_activate_channel", text="2").channel = 1
+        row.operator("retico.uv_activate_channel", text="1").channel = 0
+        row.operator("retico.uv_activate_channel", text="2").channel = 1
         # rename channels
         row = layout.row(align=True)
-        row.operator("nothing3d.uv_rename_channel", text="Rename channels")
+        row.operator("retico.uv_rename_channel", text="Rename channels")
         # box mapping
         row = layout.row(align=True)
-        row.operator("nothing3d.uv_box_mapping", text="Box mapping")
+        row.operator("retico.uv_box_mapping", text="Box mapping")
         row.prop(context.scene, "box_mapping_size", text="")
         # report
         row = layout.row(align=True)
         row.label(text="Report:")
-        row.operator("nothing3d.uv_report_none", text="no UV").channel = 0
-        row.operator("nothing3d.uv_report_none", text="2").channel = 1
+        row.operator("retico.uv_report_none", text="no UV").channel = 0
+        row.operator("retico.uv_report_none", text="2").channel = 1
 
 
-class NTHG3D_OT_uv_activate_channel(bpy.types.Operator):
-    bl_idname = "nothing3d.uv_activate_channel"
+class RETICO_OT_uv_activate_channel(bpy.types.Operator):
+    bl_idname = "retico.uv_activate_channel"
     bl_label = "Set active UV"
     bl_description = "Set active UV"
     channel: IntProperty()
@@ -224,8 +224,8 @@ class NTHG3D_OT_uv_activate_channel(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class NTHG3D_OT_uv_box_mapping(bpy.types.Operator):
-    bl_idname = "nothing3d.uv_box_mapping"
+class RETICO_OT_uv_box_mapping(bpy.types.Operator):
+    bl_idname = "retico.uv_box_mapping"
     bl_label = "UV1 box mapping (MagicUV UVW algorithm)"
     bl_description = "UV1 box mapping (MagicUV UVW algorithm)"
     
@@ -242,8 +242,8 @@ class NTHG3D_OT_uv_box_mapping(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class NTHG3D_OT_uv_rename_channel(bpy.types.Operator):
-    bl_idname = "nothing3d.uv_rename_channel"
+class RETICO_OT_uv_rename_channel(bpy.types.Operator):
+    bl_idname = "retico.uv_rename_channel"
     bl_label = "Normalize UV channels naming"
     bl_description = "Normalize UV channels naming (UVMap, then UV2, UV3...)"
 
@@ -257,8 +257,8 @@ class NTHG3D_OT_uv_rename_channel(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class NTHG3D_OT_uv_report_none(bpy.types.Operator):
-    bl_idname = "nothing3d.uv_report_none"
+class RETICO_OT_uv_report_none(bpy.types.Operator):
+    bl_idname = "retico.uv_report_none"
     bl_label = "Report object without UV chan"
     bl_description = "Report object without UV chan, both in console and Info editor"
     channel: IntProperty()
@@ -278,11 +278,11 @@ class NTHG3D_OT_uv_report_none(bpy.types.Operator):
 
 
 classes = (
-    NTHG3D_PT_uv_panel,
-    NTHG3D_OT_uv_activate_channel,
-    NTHG3D_OT_uv_box_mapping,
-    NTHG3D_OT_uv_rename_channel,
-    NTHG3D_OT_uv_report_none,
+    RETICO_PT_uv_panel,
+    RETICO_OT_uv_activate_channel,
+    RETICO_OT_uv_box_mapping,
+    RETICO_OT_uv_rename_channel,
+    RETICO_OT_uv_report_none,
 )
 
 

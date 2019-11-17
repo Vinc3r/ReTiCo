@@ -72,29 +72,29 @@ def set_autosmooth(user_angle):
     return {'FINISHED'}
 
 
-class NTHG3D_PT_mesh_panel(bpy.types.Panel):
+class RETICO_PT_mesh_panel(bpy.types.Panel):
     bl_label = "Meshes"
-    bl_idname = "NTHG3D_PT_mesh_panel"
+    bl_idname = "RETICO_PT_mesh_panel"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Nothing-is-3D"
+    bl_category = "ReTiCo"
 
     def draw(self, context):
         layout = self.layout
         # transfer object name to mesh name
         row = layout.row()
-        row.operator("nothing3d.mesh_transfer_names", text="Transfer names")
+        row.operator("retico.mesh_transfer_names", text="Transfer names")
         # overwrite autosmooth
         row = layout.row(align=True)
-        row.operator("nothing3d.mesh_set_autosmooth", text="Set autosmooth")
+        row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
         row.prop(context.scene, "autosmooth_angle", text="", slider=True)
         # copy names to clipboard
         row = layout.row()
-        row.operator("nothing3d.mesh_name_to_clipboard", text="Copy names to clipboard")
+        row.operator("retico.mesh_name_to_clipboard", text="Copy names to clipboard")
 
 
-class NTHG3D_OT_mesh_name_to_clipboard(bpy.types.Operator):
-    bl_idname = "nothing3d.mesh_name_to_clipboard"
+class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
+    bl_idname = "retico.mesh_name_to_clipboard"
     bl_label = "Copy Object name to clipboard"
     bl_description = "Copy Object name to clipboard"
 
@@ -106,8 +106,8 @@ class NTHG3D_OT_mesh_name_to_clipboard(bpy.types.Operator):
         meshes_names_to_clipboard()
         return {'FINISHED'}
 
-class NTHG3D_OT_mesh_transfer_names(bpy.types.Operator):
-    bl_idname = "nothing3d.mesh_transfer_names"
+class RETICO_OT_mesh_transfer_names(bpy.types.Operator):
+    bl_idname = "retico.mesh_transfer_names"
     bl_label = "Copy Object name to its Data name"
     bl_description = "Copy Object name to its Data name"
 
@@ -120,8 +120,8 @@ class NTHG3D_OT_mesh_transfer_names(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class NTHG3D_OT_mesh_set_autosmooth(bpy.types.Operator):
-    bl_idname = "nothing3d.mesh_set_autosmooth"
+class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
+    bl_idname = "retico.mesh_set_autosmooth"
     bl_label = "Set autosmooth to 85° and delete custom normals"
     bl_description = "Set autosmooth to 85° and delete custom normals"
 
@@ -135,10 +135,10 @@ class NTHG3D_OT_mesh_set_autosmooth(bpy.types.Operator):
 
 
 classes = (
-    NTHG3D_PT_mesh_panel,
-    NTHG3D_OT_mesh_transfer_names,
-    NTHG3D_OT_mesh_set_autosmooth,
-    NTHG3D_OT_mesh_name_to_clipboard,
+    RETICO_PT_mesh_panel,
+    RETICO_OT_mesh_transfer_names,
+    RETICO_OT_mesh_set_autosmooth,
+    RETICO_OT_mesh_name_to_clipboard,
 )
 
 

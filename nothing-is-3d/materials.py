@@ -218,12 +218,12 @@ def report_no_materials():
     return message_without_mtl, message_index, is_all_good
 
 
-class NTHG3D_PT_material_panel(bpy.types.Panel):
-    bl_idname = "NTHG3D_PT_material_panel"
+class RETICO_PT_material_panel(bpy.types.Panel):
+    bl_idname = "RETICO_PT_material_panel"
     bl_label = "Materials"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Nothing-is-3D"
+    bl_category = "ReTiCo"
 
     def draw(self, context):
         layout = self.layout
@@ -232,28 +232,28 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
         row = box.row(align=True)
         # backface culling
         row.label(text="BackFace:")
-        row.operator("nothing3d.material_backface", text="On").toogle = True
-        row.operator("nothing3d.material_backface", text="Off").toogle = False
+        row.operator("retico.material_backface", text="On").toogle = True
+        row.operator("retico.material_backface", text="Off").toogle = False
         row = box.row(align=True)
         # active texture node
         row.label(text="Activate texture node:")
         grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
-        row.operator("nothing3d.material_active_texture",
+        row.operator("retico.material_active_texture",
                      text="Albedo").texture_type = "albedo"
         row = grid.row(align=True)
-        row.operator("nothing3d.material_active_texture",
+        row.operator("retico.material_active_texture",
                      text="ORM").texture_type = "orm"
         row = grid.row(align=True)
-        row.operator("nothing3d.material_active_texture",
+        row.operator("retico.material_active_texture",
                      text="Normal").texture_type = "normal"
         row = grid.row(align=True)
-        row.operator("nothing3d.material_active_texture",
+        row.operator("retico.material_active_texture",
                      text="Emissive").texture_type = "emit"
         # transfer name
         row = box.row(align=True)
-        row.operator("nothing3d.material_transfer_names", text="Name from Object")
+        row.operator("retico.material_transfer_names", text="Name from Object")
         row = layout.row()
         # glTF workflow
         row.label(text="glTF workflow:")
@@ -264,24 +264,24 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
         grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
-        row.operator("nothing3d.material_gltf_mute",
+        row.operator("retico.material_gltf_mute",
                      text="Albedo").exclude = "albedo"
         row = grid.row(align=True)
-        row.operator("nothing3d.material_gltf_mute",
+        row.operator("retico.material_gltf_mute",
                      text="ORM").exclude = "orm"
         row = grid.row(align=True)
-        row.operator("nothing3d.material_gltf_mute",
+        row.operator("retico.material_gltf_mute",
                      text="Normal").exclude = "normal"
         row = grid.row(align=True)
-        row.operator("nothing3d.material_gltf_mute",
+        row.operator("retico.material_gltf_mute",
                      text="Emissive").exclude = "emit"
         grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
-        row.operator("nothing3d.material_gltf_mute",
+        row.operator("retico.material_gltf_mute",
                      text="Mute all").exclude = "mute"
         row = grid.row(align=True)
-        row.operator("nothing3d.material_gltf_mute",
+        row.operator("retico.material_gltf_mute",
                      text="Unmute all").exclude = "unmute"
         # fixing
         row = box.row()
@@ -290,18 +290,18 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         ## colorspace
         row = grid.row(align=True)
-        row.operator("nothing3d.material_gltf_colorspace", text="Colorspace")
+        row.operator("retico.material_gltf_colorspace", text="Colorspace")
         ## uv nodes
         row = grid.row(align=True)
-        row.operator("nothing3d.material_gltf_uvnode_naming", text="UV nodes")
+        row.operator("retico.material_gltf_uvnode_naming", text="UV nodes")
         # report
         row = layout.row(align=True)
         row.label(text="Report: ")
-        row.operator("nothing3d.material_report_none", text="no Mat")
+        row.operator("retico.material_report_none", text="no Mat")
 
 
-class NTHG3D_OT_material_backface(bpy.types.Operator):
-    bl_idname = "nothing3d.material_backface"
+class RETICO_OT_material_backface(bpy.types.Operator):
+    bl_idname = "retico.material_backface"
     bl_label = "Turn backFaceCulling on/off"
     bl_description = "Turn backFaceCulling on/off"
     toogle: BoolProperty()
@@ -310,8 +310,8 @@ class NTHG3D_OT_material_backface(bpy.types.Operator):
         set_backface_culling(self.toogle)
         return {'FINISHED'}
 
-class NTHG3D_OT_material_transfer_names(bpy.types.Operator):
-    bl_idname = "nothing3d.material_transfer_names"
+class RETICO_OT_material_transfer_names(bpy.types.Operator):
+    bl_idname = "retico.material_transfer_names"
     bl_label = "Copy Object name to its material name"
     bl_description = "Copy Object name to its material name"
 
@@ -323,8 +323,8 @@ class NTHG3D_OT_material_transfer_names(bpy.types.Operator):
         transfer_names()
         return {'FINISHED'}
 
-class NTHG3D_OT_material_gltf_mute(bpy.types.Operator):
-    bl_idname = "nothing3d.material_gltf_mute"
+class RETICO_OT_material_gltf_mute(bpy.types.Operator):
+    bl_idname = "retico.material_gltf_mute"
     bl_label = "Mute textures for baking process"
     bl_description = "Mute textures for baking process"
     exclude: StringProperty()
@@ -333,8 +333,8 @@ class NTHG3D_OT_material_gltf_mute(bpy.types.Operator):
         gltf_mute_textures(self.exclude)
         return {'FINISHED'}
 
-class NTHG3D_OT_material_gltf_colorspace(bpy.types.Operator):
-    bl_idname = "nothing3d.material_gltf_colorspace"
+class RETICO_OT_material_gltf_colorspace(bpy.types.Operator):
+    bl_idname = "retico.material_gltf_colorspace"
     bl_label = "Fix gltf textures colorspace"
     bl_description = "Fix gltf textures colorspace"
 
@@ -343,8 +343,8 @@ class NTHG3D_OT_material_gltf_colorspace(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class NTHG3D_OT_material_gltf_uvnode_naming(bpy.types.Operator):
-    bl_idname = "nothing3d.material_gltf_uvnode_naming"
+class RETICO_OT_material_gltf_uvnode_naming(bpy.types.Operator):
+    bl_idname = "retico.material_gltf_uvnode_naming"
     bl_label = "Relink TEXCOORD_x naming to actual mesh uv names"
     bl_description = "Relink TEXCOORD_x naming to actual mesh uv names"
 
@@ -353,8 +353,8 @@ class NTHG3D_OT_material_gltf_uvnode_naming(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class NTHG3D_OT_material_active_texture(bpy.types.Operator):
-    bl_idname = "nothing3d.material_active_texture"
+class RETICO_OT_material_active_texture(bpy.types.Operator):
+    bl_idname = "retico.material_active_texture"
     bl_label = "Activate a texture to be shown in viewport Solid Texture mode"
     bl_description = "Activate a texture to be shown in viewport Solid Texture mode"
     texture_type: StringProperty()
@@ -364,8 +364,8 @@ class NTHG3D_OT_material_active_texture(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class NTHG3D_OT_material_report_none(bpy.types.Operator):
-    bl_idname = "nothing3d.material_report_none"
+class RETICO_OT_material_report_none(bpy.types.Operator):
+    bl_idname = "retico.material_report_none"
     bl_label = "Report object without materials"
     bl_description = "Report object without materials, both in console and Info editor"
 
@@ -387,14 +387,14 @@ class NTHG3D_OT_material_report_none(bpy.types.Operator):
 
 
 classes = (
-    NTHG3D_PT_material_panel,
-    NTHG3D_OT_material_backface,
-    NTHG3D_OT_material_transfer_names,
-    NTHG3D_OT_material_gltf_mute,
-    NTHG3D_OT_material_active_texture,
-    NTHG3D_OT_material_gltf_colorspace,
-    NTHG3D_OT_material_gltf_uvnode_naming,
-    NTHG3D_OT_material_report_none,
+    RETICO_PT_material_panel,
+    RETICO_OT_material_backface,
+    RETICO_OT_material_transfer_names,
+    RETICO_OT_material_gltf_mute,
+    RETICO_OT_material_active_texture,
+    RETICO_OT_material_gltf_colorspace,
+    RETICO_OT_material_gltf_uvnode_naming,
+    RETICO_OT_material_report_none,
 )
 
 

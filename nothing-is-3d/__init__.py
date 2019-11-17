@@ -1,10 +1,10 @@
 bl_info = {
-    "name": "Nothing-is-3D tools",
-    "description": "Some scripts 3D realtime workflow oriented.",
+    "name": "ReTiCo (RealTime Companion)",
+    "description": "RealTime Companion, a 3D realtime workflow addon oriented.",
     "author": "Vincent (V!nc3r) Lamy",
-    "category": "Object",
-    "wiki_url": 'https://github.com/Vinc3r/BlenderScripts#nothing-is-3d-tools',
-    "tracker_url": 'https://github.com/Vinc3r/BlenderScripts/issues',
+    "category": "3D View",
+    "wiki_url": 'https://github.com/Vinc3r/ReTiCo#ReTiCo',
+    "tracker_url": 'https://github.com/Vinc3r/ReTiCo/issues',
     "version": (2019, 11, 17),
     "blender": (2, 80, 0)
 }
