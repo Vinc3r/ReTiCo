@@ -56,6 +56,43 @@ def set_active_texture(type="albedo"):
     return {'FINISHED'}
 
 
+def transfer_names():
+    obj_no_map_names: str = ""
+    message = ""
+    is_all_good = True
+    
+    # handling active object
+    user_active = bpy.context.view_layer.objects.active
+    is_user_in_edit_mode = False
+    if bpy.context.view_layer.objects.active.mode == 'EDIT':
+        is_user_in_edit_mode = True
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+    # function core
+    objects_selected = selection_sets.meshes_in_selection()
+    for obj in objects_selected:
+        if bpy.context.object.material_slots.values():
+            bpy.context.view_layer.objects.active = obj
+            mesh = obj.name   
+            mat_slot0 = bpy.context.object.material_slots[0].name
+            bpy.data.materials[mat_slot0].name = mesh
+        else:
+            obj_no_map_names += "{}, ".format(obj.name)
+            message_suffix = "Add material on:"
+            message = "{} {}".format(message_suffix, obj_no_map_names)
+            is_all_good = False
+
+    return message[:-2], is_all_good
+            
+
+    # handling active object
+    bpy.context.view_layer.objects.active = user_active
+    if is_user_in_edit_mode:
+        bpy.ops.object.mode_set(mode='EDIT')
+
+    return {'FINISHED'}
+
+
 def gltf_fix_colorspace():
     objects_selected = selection_sets.meshes_with_materials()
 
@@ -184,6 +221,9 @@ class NTHG3D_PT_material_panel(bpy.types.Panel):
         row = grid.row(align=True)
         row.operator("nothing3d.material_active_texture",
                      text="Emissive").texture_type = "emit"
+        # row = grid.row(align=True)
+        row = layout.row()
+        row.operator("nothing3d.material_transfer_names", text="Transfer names")
         row = layout.row()
         # glTF workflow
         row.label(text="glTF workflow:")
@@ -234,6 +274,18 @@ class NTHG3D_OT_material_backface(bpy.types.Operator):
         set_backface_culling(self.toogle)
         return {'FINISHED'}
 
+class NTHG3D_OT_material_transfer_names(bpy.types.Operator):
+    bl_idname = "nothing3d.material_transfer_names"
+    bl_label = "Copy Object name to its material name"
+    bl_description = "Copy Object name to its material name"
+    exclude: StringProperty()
+
+    def execute(self, context):
+        message, is_all_good = transfer_names()
+        if not is_all_good:
+            self.report({'WARNING'}, message)
+
+        return {'FINISHED'}
 
 class NTHG3D_OT_material_gltf_mute(bpy.types.Operator):
     bl_idname = "nothing3d.material_gltf_mute"
@@ -244,7 +296,6 @@ class NTHG3D_OT_material_gltf_mute(bpy.types.Operator):
     def execute(self, context):
         gltf_mute_textures(self.exclude)
         return {'FINISHED'}
-
 
 class NTHG3D_OT_material_gltf_colorspace(bpy.types.Operator):
     bl_idname = "nothing3d.material_gltf_colorspace"
@@ -280,6 +331,7 @@ class NTHG3D_OT_material_active_texture(bpy.types.Operator):
 classes = (
     NTHG3D_PT_material_panel,
     NTHG3D_OT_material_backface,
+    NTHG3D_OT_material_transfer_names,
     NTHG3D_OT_material_gltf_mute,
     NTHG3D_OT_material_active_texture,
     NTHG3D_OT_material_gltf_colorspace,
