@@ -109,15 +109,18 @@ def gltf_fix_colorspace():
 def gltf_fix_uvnode_naming(operator):
     objects_selected = selection_sets.meshes_with_materials()
     materials_error = ""
+    naming_issue = False
 
     print("-----")
 
     # debug: C.selected_objects[0].data.materials[0].node_tree.nodes['UV Map']
     """
-        things to do:
-            - detect if assigned name exists (snippet: https://i.imgur.com/f5ouV4C.png)
-            - case 1: user use ReTiCo naming convention, but mesh have differents uv name
-            - case 2: imported gltf material
+        - first, detect if node assigned name is fine
+        - then, try to detect UV chan number from the node name
+            - Blender use UVMap then UVMap.xxx
+            - glTF use "TEXCOORD_xx" pattern
+            - Retico use UVMap then UVx
+        - if not possible or other pattern, warn the user and do nothing
     """
 
     for obj in objects_selected:
@@ -126,28 +129,60 @@ def gltf_fix_uvnode_naming(operator):
             if mat.use_nodes:
                 naming_issue = False
                 for node in mat.node_tree.nodes:
-                    if node.type != 'UVMAP':
+                    if node.type == 'UVMAP':
                         # node have to be an UVMAP type
-                        continue
-                    print("--fdsgfd:::", node.uv_map)
-                    if node.uv_map == "" and len(obj.data.uv_layers) > 0:
-                        # if no uvmap set, assigning uv1
-                        node.uv_map = obj.data.uv_layers[0].name
-                    elif "TEXCOORD_" in node.uv_map:
-                        print("waaaa?")
-                        # get gltf UV chan id: "TEXCOORD_0" give us "0" as int
-                        channel_number = int(str(node.uv_map)[-1:])
-                        print((len(obj.data.uv_layers) - 1), "---", channel_number)
-                        #if (len(obj.data.uv_layers) - 1) >= channel_number:
-                        #    node.uv_map = obj.data.uv_layers[channel_number].name
-                    else:
-                        naming_issue = True
+                        is_uv_chan_exists = False
+                        uv_layers_number = len(mesh.uv_layers)
+                        if uv_layers_number == 0:
+                            naming_issue = True
+                            continue
+                        for uvchan in mesh.uv_layers:
+                            if node.uv_map in uvchan.name:
+                                is_uv_chan_exists = True
+                        if is_uv_chan_exists:
+                            # if node is using existing mesh chan, no pb, skipping
+                            continue
+                        # if no uvmap is set, assigning uv1
+                        if node.uv_map == "" and uv_layers_number > 0:
+                            node.uv_map = mesh.uv_layers[0].name
+                        # blender default naming
+                        elif "UVMap" in node.uv_map:
+                            if node.uv_map == "UVMap":
+                                node.uv_map = mesh.uv_layers[0].name
+                            elif "UVMap." in node.uv_map:
+                                # "UVMap.002" give us "2" as int
+                                channel_number = int(str(node.uv_map).split("UVMap.")[1])
+                                if (uv_layers_number - 1) >= channel_number:
+                                    node.uv_map = mesh.uv_layers[channel_number].name
+                                else:
+                                    naming_issue = True
+                        # gltf naming 
+                        elif "TEXCOORD_" in node.uv_map:
+                            # "TEXCOORD_0" give us "0" as int
+                            channel_number = int(str(node.uv_map).split("TEXCOORD_")[1])
+                            # we can assign the correct mesh uv, if it exists
+                            if (uv_layers_number - 1) >= channel_number:
+                                node.uv_map = mesh.uv_layers[channel_number].name
+                            else:
+                                naming_issue = True
+                        # ReTiCo naming
+                        elif "UV" in node.uv_map:
+                            try:
+                                channel_number = int(str(node.uv_map).split("UV")[1])
+                                if (uv_layers_number - 1) >= channel_number:
+                                    node.uv_map = mesh.uv_layers[channel_number].name
+                                else:
+                                    naming_issue = True
+                            except:
+                                naming_issue = True
+                        else:
+                            naming_issue = True
                 if naming_issue:
-                    materials_error += "{}, ".format(mat.name)
+                    materials_error += "{} ({}), ".format(mat.name, obj.name)
     if materials_error != "":
         # removing ", " charz
         operator.report(
-            {'WARNING'}, "UV chan can't be detected, please check: {}".format(materials_error[:-2]))
+            {'WARNING'}, "Some node UV links can't be fixed, check: {}".format(materials_error[:-2]))
     return {'FINISHED'}
 
 
@@ -313,7 +348,7 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row.operator("retico.material_gltf_colorspace", text="Colorspace")
         ### uv nodes
         row = grid.row(align=True)
-        row.operator("retico.material_gltf_uvnode_naming", text="UV nodes")
+        row.operator("retico.material_gltf_uvnode_naming", text="UV links")
 
 
 class RETICO_OT_material_backface(bpy.types.Operator):
