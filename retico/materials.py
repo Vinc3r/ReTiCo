@@ -110,28 +110,44 @@ def gltf_fix_uvnode_naming(operator):
     objects_selected = selection_sets.meshes_with_materials()
     materials_error = ""
 
+    print("-----")
+
+    # debug: C.selected_objects[0].data.materials[0].node_tree.nodes['UV Map']
+    """
+        things to do:
+            - detect if assigned name exists (snippet: https://i.imgur.com/f5ouV4C.png)
+            - case 1: user use ReTiCo naming convention, but mesh have differents uv name
+            - case 2: imported gltf material
+    """
+
     for obj in objects_selected:
         mesh = obj.data
         for mat in mesh.materials:
             if mat.use_nodes:
                 naming_issue = False
                 for node in mat.node_tree.nodes:
-                    if node.type != 'UVMAP' or node.uv_map == '':
-                        # node have to pass first tests
+                    if node.type != 'UVMAP':
+                        # node have to be an UVMAP type
                         continue
-                    # get gltf UV chan id: "TEXCOORD_0" give us "0" as int
-                    channel_number = str(node.uv_map)[-1:]
-                    try:
-                        node.uv_map = obj.data.uv_layers[int(
-                            channel_number)].name
-                    except:
+                    print("--fdsgfd:::", node.uv_map)
+                    if node.uv_map == "" and len(obj.data.uv_layers) > 0:
+                        # if no uvmap set, assigning uv1
+                        node.uv_map = obj.data.uv_layers[0].name
+                    elif "TEXCOORD_" in node.uv_map:
+                        print("waaaa?")
+                        # get gltf UV chan id: "TEXCOORD_0" give us "0" as int
+                        channel_number = int(str(node.uv_map)[-1:])
+                        print((len(obj.data.uv_layers) - 1), "---", channel_number)
+                        #if (len(obj.data.uv_layers) - 1) >= channel_number:
+                        #    node.uv_map = obj.data.uv_layers[channel_number].name
+                    else:
                         naming_issue = True
                 if naming_issue:
                     materials_error += "{}, ".format(mat.name)
     if materials_error != "":
         # removing ", " charz
         operator.report(
-            {'WARNING'}, "Can't be parsed: {}".format(materials_error[:-2]))
+            {'WARNING'}, "UV chan can't be detected, please check: {}".format(materials_error[:-2]))
     return {'FINISHED'}
 
 
