@@ -1,6 +1,6 @@
 # ReTiCo
 
-**Re**al **Ti**me **Co**mpanion, a Blender add-on made to work faster, oriented 3D realtime and glTF workflow.
+**Re**al **Ti**me **Co**mpanion, a Blender add-on made to work faster, oriented 3D realtime and glTF workflows.
 
 [Changelog](https://github.com/Vinc3r/ReTiCo/blob/master/changelog.md).
 
@@ -17,7 +17,7 @@ ReTiCo tools are now available in `3DView` > `Sidebar` > `ReTiCo` tab.
 
 ## Documentation
 
-This addon was made to help using a 3D realtime workflow, and so glTF export.
+This addon was made to help 3D realtime workflows, and also glTF import/export.
 
 - <a href="#materials">Materials</a> panel
 - <a href="#meshes">Meshes</a> panel
@@ -34,6 +34,8 @@ On selected objects:
   - glTF workflow:
     - **Mute textures except**: disable some texture nodes, useful for texture baking
     - **Fix**: try to detect some common issues
+        - **Colorspace**: check if albedo & emit are using `sRGB` and other maps `Non-Color`
+        - **UV links**: check if UV chan name in nodes is the same as mesh UV channel name ([example](_readmeAssets_/doc-wrong-uv-name.png))
 
 ### [*Meshes* panel](#meshes)
 
