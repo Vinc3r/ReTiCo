@@ -284,6 +284,29 @@ def report_no_materials():
     return message_without_mtl, message_index, is_all_good
 
 
+def report_several_materials():
+    objects_several_mtl_name = ""
+    message_several_mtl = ""
+    is_all_good = False
+
+    objects_selected = selection_sets.meshes_in_selection()
+
+    for obj in objects_selected:
+        # no materials at all, don't care
+        if not obj.data.materials:
+            continue
+        # if index but without mat
+        elif len(obj.data.materials) > 1:
+            objects_several_mtl_name += "{}, ".format(obj.name)
+
+    if len(objects_several_mtl_name) == 0:
+        is_all_good = True
+    else:
+        message_several_mtl = "Multi materials on: {}".format(
+            objects_several_mtl_name[:-2])  # removing last ", " charz
+    return message_several_mtl, is_all_good
+
+
 class RETICO_PT_material_panel(bpy.types.Panel):
     bl_idname = "RETICO_PT_material_panel"
     bl_label = "Materials"
@@ -324,6 +347,7 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row = box.row(align=True)
         row.label(text="Report: ")
         row.operator("retico.material_report_none", text="no Mat")
+        row.operator("retico.material_report_several", text="1+ Mat")
         # glTF workflow
         row = layout.row()
         row.label(text="glTF workflow:")
@@ -452,6 +476,26 @@ class RETICO_OT_material_report_none(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class RETICO_OT_material_report_several(bpy.types.Operator):
+    bl_idname = "retico.material_report_several"
+    bl_label = "Report object with more than 1 material"
+    bl_description = "Report object with more than 1 material, both in console and Info editor"
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.view_layer.objects) > 0
+
+    def execute(self, context):
+        message_several_mtl, is_all_good = report_several_materials()
+        if is_all_good:
+            self.report({'INFO'}, "No multi-material found")
+        else:
+            if len(message_several_mtl) > 0:
+                self.report({'WARNING'}, message_several_mtl)
+
+        return {'FINISHED'}
+
+
 classes = (
     RETICO_PT_material_panel,
     RETICO_OT_material_backface,
@@ -461,6 +505,7 @@ classes = (
     RETICO_OT_material_gltf_colorspace,
     RETICO_OT_material_gltf_uvnode_naming,
     RETICO_OT_material_report_none,
+    RETICO_OT_material_report_several,
 )
 
 
