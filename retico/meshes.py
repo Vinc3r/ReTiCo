@@ -11,9 +11,12 @@ from bpy.props import (
     StringProperty
 )
 
-def meshes_names_to_clipboard():
+
+def meshes_names_to_clipboard(selected_only=True):
     meshes_names_to_clipboard = ""
-    objects_selected = selection_sets.meshes_in_selection()
+    objects_selected = selection_sets.meshes_in_selection(
+    ) if selected_only else selection_sets.meshes_selectable()
+
     for obj in objects_selected:
         if obj is objects_selected[-1]:
             meshes_names_to_clipboard += '"{}"'.format(obj.name)
@@ -22,16 +25,20 @@ def meshes_names_to_clipboard():
     bpy.context.window_manager.clipboard = meshes_names_to_clipboard
     return {'FINISHED'}
 
-def transfer_names():
+
+def transfer_names(selected_only=True):
     # handling active object
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
+
     if bpy.context.view_layer.objects.active.mode == 'EDIT':
         is_user_in_edit_mode = True
         bpy.ops.object.mode_set(mode='OBJECT')
 
     # function core
-    objects_selected = selection_sets.meshes_in_selection()
+    objects_selected = selection_sets.meshes_in_selection(
+    ) if selected_only else selection_sets.meshes_selectable()
+
     for obj in objects_selected:
         bpy.context.view_layer.objects.active = obj
         mesh = obj.data
@@ -45,16 +52,19 @@ def transfer_names():
     return {'FINISHED'}
 
 
-def set_autosmooth(user_angle):
+def set_autosmooth(selected_only=True, user_angle=85):
     # handling active object
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
+
     if bpy.context.view_layer.objects.active.mode == 'EDIT':
         is_user_in_edit_mode = True
         bpy.ops.object.mode_set(mode='OBJECT')
 
     # function core
-    objects_selected = selection_sets.meshes_in_selection()
+    objects_selected = selection_sets.meshes_in_selection(
+    ) if selected_only else selection_sets.meshes_selectable()
+
     for obj in objects_selected:
         bpy.context.view_layer.objects.active = obj
         mesh = obj.data
@@ -81,16 +91,25 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        box = layout.box()
+        row = box.row()
+        row.prop(context.scene, "retico_mesh_check_only_selected",
+                 text="only selected")
+
+        box = layout.box()
         # transfer object name to mesh name
-        row = layout.row()
+        row = box.row()
         row.operator("retico.mesh_transfer_names", text="Transfer names")
+
         # overwrite autosmooth
-        row = layout.row(align=True)
+        row = box.row(align=True)
         row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
         row.prop(context.scene, "retico_autosmooth_angle", text="", slider=True)
+
         # copy names to clipboard
-        row = layout.row()
-        row.operator("retico.mesh_name_to_clipboard", text="Copy names to clipboard")
+        row = box.row()
+        row.operator("retico.mesh_name_to_clipboard",
+                     text="Copy names to clipboard")
 
 
 class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
@@ -103,8 +122,10 @@ class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        meshes_names_to_clipboard()
+        meshes_names_to_clipboard(
+            bpy.context.scene.retico_mesh_check_only_selected)
         return {'FINISHED'}
+
 
 class RETICO_OT_mesh_transfer_names(bpy.types.Operator):
     bl_idname = "retico.mesh_transfer_names"
@@ -116,7 +137,7 @@ class RETICO_OT_mesh_transfer_names(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        transfer_names()
+        transfer_names(bpy.context.scene.retico_mesh_check_only_selected)
         return {'FINISHED'}
 
 
@@ -130,7 +151,8 @@ class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        set_autosmooth(context.scene.retico_autosmooth_angle)
+        set_autosmooth(bpy.context.scene.retico_mesh_check_only_selected,
+                       context.scene.retico_autosmooth_angle)
         return {'FINISHED'}
 
 
@@ -146,7 +168,11 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-
+    Scene.retico_mesh_check_only_selected = BoolProperty(
+        name="Mesh tab use selected only",
+        description="Should Mesh operations only check selected objects?",
+        default=True
+    )
     Scene.retico_autosmooth_angle = FloatProperty(
         name="autosmooth angle",
         description="autosmooth angle",
@@ -162,6 +188,7 @@ def unregister():
         unregister_class(cls)
 
     del Scene.retico_autosmooth_angle
+    del Scene.retico_mesh_check_only_selected
 
 
 if __name__ == "__main__":
