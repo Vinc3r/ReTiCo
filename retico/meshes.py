@@ -87,7 +87,7 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
         # overwrite autosmooth
         row = layout.row(align=True)
         row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
-        row.prop(context.scene, "autosmooth_angle", text="", slider=True)
+        row.prop(context.scene, "retico_autosmooth_angle", text="", slider=True)
         # copy names to clipboard
         row = layout.row()
         row.operator("retico.mesh_name_to_clipboard", text="Copy names to clipboard")
@@ -130,7 +130,7 @@ class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        set_autosmooth(context.scene.autosmooth_angle)
+        set_autosmooth(context.scene.retico_autosmooth_angle)
         return {'FINISHED'}
 
 
@@ -147,7 +147,7 @@ def register():
     for cls in classes:
         register_class(cls)
 
-    Scene.autosmooth_angle = FloatProperty(
+    Scene.retico_autosmooth_angle = FloatProperty(
         name="autosmooth angle",
         description="autosmooth angle",
         default=85.0,
@@ -161,7 +161,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
 
-    del Scene.autosmooth_angle
+    del Scene.retico_autosmooth_angle
 
 
 if __name__ == "__main__":

@@ -197,7 +197,7 @@ class RETICO_PT_uv_panel(bpy.types.Panel):
         # box mapping
         row = layout.row(align=True)
         row.operator("retico.uv_box_mapping", text="Box mapping")
-        row.prop(context.scene, "box_mapping_size", text="")
+        row.prop(context.scene, "retico_box_mapping_size", text="")
         # report
         row = layout.row(align=True)
         row.label(text="Report:")
@@ -237,7 +237,7 @@ class RETICO_OT_uv_box_mapping(bpy.types.Operator):
         message, is_all_good = report_no_uv(0)
         if not is_all_good:
             self.report({'WARNING'}, "{}... Now fixed!".format(message))
-        box_mapping(context.scene.box_mapping_size)
+        box_mapping(context.scene.retico_box_mapping_size)
 
         return {'FINISHED'}
 
@@ -290,7 +290,7 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-    Scene.box_mapping_size = FloatProperty(
+    Scene.retico_box_mapping_size = FloatProperty(
         name="box mapping size",
         description="box mapping size",
         default=1.0,
@@ -303,7 +303,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
 
-    del Scene.box_mapping_size
+    del Scene.retico_box_mapping_size
 
 
 if __name__ == "__main__":

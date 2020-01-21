@@ -243,7 +243,7 @@ def gltf_mute_textures(exclude="albedo"):
     return {'FINISHED'}
 
 
-def report_no_materials():
+def report_no_materials(update_selection):
     objects_without_mtl = []
     objects_without_mtl_name = ""
     message_without_mtl = ""
@@ -264,6 +264,7 @@ def report_no_materials():
             for index in range(len(object_materials)):
                 if object_materials[index] is None:
                     objects_index_without_mtl.append([obj, index])
+                    objects_without_mtl.append(obj)
 
     if len(objects_without_mtl) == 0 and len(objects_index_without_mtl) == 0:
         is_all_good = True
@@ -274,6 +275,12 @@ def report_no_materials():
                 objects_without_mtl_name += "{}, ".format(obj.name)
             message_without_mtl = "No materials on: {}".format(
                 objects_without_mtl_name[:-2])  # removing last ", " charz
+            if update_selection:
+                for obj in bpy.context.selected_objects:
+                    obj.select_set(False)
+                for obj in objects_without_mtl:
+                    obj.select_set(True)
+                bpy.context.view_layer.objects.active = objects_without_mtl[0]
         # no need to check if alright
         if len(objects_index_without_mtl) > 0:
             for reports in objects_index_without_mtl:
@@ -284,7 +291,8 @@ def report_no_materials():
     return message_without_mtl, message_index, is_all_good
 
 
-def report_several_materials():
+def report_several_materials(update_selection):
+    objects_several_mtl = []
     objects_several_mtl_name = ""
     message_several_mtl = ""
     is_all_good = False
@@ -297,16 +305,25 @@ def report_several_materials():
             continue
         elif len(obj.data.materials) > 1:
             objects_several_mtl_name += "{}, ".format(obj.name)
+            if update_selection:
+                objects_several_mtl.append(obj)
 
     if len(objects_several_mtl_name) == 0:
         is_all_good = True
     else:
         message_several_mtl = "Multi materials on: {}".format(
             objects_several_mtl_name[:-2])  # removing last ", " charz
+        if update_selection:
+            for obj in bpy.context.selected_objects:
+                obj.select_set(False)
+            for obj in objects_several_mtl:
+                obj.select_set(True)
+            bpy.context.view_layer.objects.active = objects_several_mtl[0]
     return message_several_mtl, is_all_good
 
 
-def report_several_users():
+def report_several_users(update_selection):
+    objects_several_users = []
     objects_several_users_name = ""
     message_several_users = ""
     is_all_good = False
@@ -319,8 +336,10 @@ def report_several_users():
             continue
         else:
             for mat in obj.data.materials:
-                if mat.users > 1:
+                if mat and mat.users > 1:
                     objects_several_users_name += "{}, ".format(obj.name)
+                    if update_selection:
+                        objects_several_users.append(obj)
                     continue
 
     if len(objects_several_users_name) == 0:
@@ -328,6 +347,12 @@ def report_several_users():
     else:
         message_several_users = "Shared materials on: {}".format(
             objects_several_users_name[:-2])  # removing last ", " charz
+        if update_selection:
+            for obj in bpy.context.selected_objects:
+                obj.select_set(False)
+            for obj in objects_several_users:
+                obj.select_set(True)
+            bpy.context.view_layer.objects.active = objects_several_users[0]
     return message_several_users, is_all_good
 
 
@@ -340,14 +365,17 @@ class RETICO_PT_material_panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+
         # misc
         box = layout.box()
         row = box.row(align=True)
+
         # backface culling
         row.label(text="BackFace:")
         row.operator("retico.material_backface", text="On").toogle = True
         row.operator("retico.material_backface", text="Off").toogle = False
         row = box.row(align=True)
+
         # active texture node
         row.label(text="Activate texture node:")
         grid = box.grid_flow(
@@ -364,12 +392,17 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row = grid.row(align=True)
         row.operator("retico.material_active_texture",
                      text="Emissive").texture_type = "emit"
+
         # transfer name
         row = box.row(align=True)
         row.operator("retico.material_transfer_names", text="Name from Object")
+
         # report
-        row = box.row()
+        row = layout.row()
         row.label(text="Report: ")
+        box = layout.box()
+        row = box.row()
+        row.prop(context.scene, "retico_report_update_selection", text="update selection")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)        
@@ -378,11 +411,13 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row.operator("retico.material_report_several", text="1+ Mat")
         row = grid.row(align=True)
         row.operator("retico.material_report_users", text="Shared")
+
         # glTF workflow
         row = layout.row()
         row.label(text="glTF workflow:")
         box = layout.box()
         row = box.row()
+
         ## muting textures
         row.label(text="Mute textures except:")
         grid = box.grid_flow(
@@ -407,14 +442,17 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
                      text="Unmute all").exclude = "unmute"
+
         ## fixing
         row = box.row()
         row.label(text="Fix:")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+
         ### colorspace
         row = grid.row(align=True)
         row.operator("retico.material_gltf_colorspace", text="Colorspace")
+
         ### uv nodes
         row = grid.row(align=True)
         row.operator("retico.material_gltf_uvnode_naming", text="UV links")
@@ -494,7 +532,7 @@ class RETICO_OT_material_report_none(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message_without_mtl, message_index, is_all_good = report_no_materials()
+        message_without_mtl, message_index, is_all_good = report_no_materials(context.scene.retico_report_update_selection)
         if is_all_good:
             self.report({'INFO'}, "All meshes have materials")
         else:
@@ -516,7 +554,7 @@ class RETICO_OT_material_report_several(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message_several_mtl, is_all_good = report_several_materials()
+        message_several_mtl, is_all_good = report_several_materials(context.scene.retico_report_update_selection)
         if is_all_good:
             self.report({'INFO'}, "No multi-material found")
         else:
@@ -536,7 +574,7 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message_several_users, is_all_good = report_several_users()
+        message_several_users, is_all_good = report_several_users(context.scene.retico_report_update_selection)
         if is_all_good:
             self.report({'INFO'}, "No material shared")
         else:
@@ -564,13 +602,18 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
+    Scene.retico_report_update_selection = BoolProperty(
+        name="Report update selection",
+        description="Report update selection",
+        default = False
+    )
 
 
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
-
+    del Scene.retico_report_update_selection
 
 if __name__ == "__main__":
     register()
