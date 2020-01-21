@@ -4,6 +4,9 @@ import bpy
 def meshes_in_selection():
     return [o for o in bpy.context.selected_objects if o.type == 'MESH']
 
+def meshes_selectable():
+    return [o for o in bpy.context.selectable_objects if o.type == 'MESH']
+
 
 def meshes_without_uv():
     objects_selected = meshes_in_selection()
@@ -26,8 +29,13 @@ def meshes_without_uv():
     return objects_without_uv, objects_without_uv2
 
 
-def meshes_with_materials():
-    objects_selected = meshes_in_selection()
+def meshes_with_materials(selected_only=True):
+    objects_selected = []
+    if selected_only:
+        objects_selected = meshes_in_selection()
+    else:
+        objects_selected = meshes_selectable()
+
     objects_with_mtl = []
     for obj in objects_selected:
         if len(obj.data.materials) == 0:

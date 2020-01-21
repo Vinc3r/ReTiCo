@@ -12,7 +12,7 @@ from bpy.props import (
 
 
 def set_backface_culling(mode):
-    objects_selected = selection_sets.meshes_with_materials()
+    objects_selected = selection_sets.meshes_with_materials(bpy.context.scene.retico_mtl_check_only_selected)
     for obj in objects_selected:
         for mat in obj.data.materials:
             if mat is not None:
@@ -32,7 +32,7 @@ def set_active_texture(type="albedo"):
     elif type == "emit":
         texture_condition = ['TEX_IMAGE', 'RGBA', 'EMISSION']
 
-    objects_selected = selection_sets.meshes_with_materials()
+    objects_selected = selection_sets.meshes_with_materials(bpy.context.scene.retico_mtl_check_only_selected)
 
     for obj in objects_selected:
         mesh = obj.data
@@ -83,7 +83,7 @@ def transfer_names():
 
 
 def gltf_fix_colorspace():
-    objects_selected = selection_sets.meshes_with_materials()
+    objects_selected = selection_sets.meshes_with_materials(bpy.context.scene.retico_mtl_check_only_selected)
 
     for obj in objects_selected:
         mesh = obj.data
@@ -109,7 +109,7 @@ def gltf_fix_colorspace():
 
 
 def gltf_fix_uvnode_naming(operator):
-    objects_selected = selection_sets.meshes_with_materials()
+    objects_selected = selection_sets.meshes_with_materials(bpy.context.scene.retico_mtl_check_only_selected)
     materials_error = ""
     naming_issue = False
 
@@ -183,7 +183,7 @@ def gltf_mute_textures(exclude="albedo"):
     elif exclude == "emit":
         no_muting_condition = ['TEX_IMAGE', 'RGBA', 'EMISSION']
 
-    objects_selected = selection_sets.meshes_with_materials()
+    objects_selected = selection_sets.meshes_with_materials(bpy.context.scene.retico_mtl_check_only_selected)
 
     for obj in objects_selected:
         mesh = obj.data
@@ -366,19 +366,28 @@ class RETICO_PT_material_panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
+        box = layout.box()   
+        row = box.row()
+        row.prop(context.scene, "retico_mtl_check_only_selected", text="check only selected")
+
         # misc
         box = layout.box()
         row = box.row(align=True)
 
-        # backface culling
+        ## backface culling
         row.label(text="BackFace:")
         row.operator("retico.material_backface", text="On").toogle = True
         row.operator("retico.material_backface", text="Off").toogle = False
-        row = box.row(align=True)
 
-        # active texture node
+        ## transfer name
+        row = box.row(align=True)
+        row.operator("retico.material_transfer_names", text="Name from Object")
+
+        ## active texture node
+        subbox = box.box()
+        row = subbox.row(align=True)
         row.label(text="Activate texture node:")
-        grid = box.grid_flow(
+        grid = subbox.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_active_texture",
@@ -393,14 +402,10 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row.operator("retico.material_active_texture",
                      text="Emissive").texture_type = "emit"
 
-        # transfer name
-        row = box.row(align=True)
-        row.operator("retico.material_transfer_names", text="Name from Object")
-
         # report
-        row = layout.row()
-        row.label(text="Report: ")
         box = layout.box()
+        row = box.row()
+        row.label(text="Report: ")
         row = box.row()
         row.prop(context.scene, "retico_report_update_selection", text="update selection")
         grid = box.grid_flow(
@@ -413,14 +418,15 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row.operator("retico.material_report_users", text="Shared")
 
         # glTF workflow
-        row = layout.row()
-        row.label(text="glTF workflow:")
         box = layout.box()
         row = box.row()
+        row.label(text="glTF workflow:")
 
         ## muting textures
+        subbox = box.box()
+        row = subbox.row()
         row.label(text="Mute textures except:")
-        grid = box.grid_flow(
+        grid = subbox.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
@@ -434,7 +440,7 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
                      text="Emissive").exclude = "emit"
-        grid = box.grid_flow(
+        grid = subbox.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
@@ -444,9 +450,10 @@ class RETICO_PT_material_panel(bpy.types.Panel):
                      text="Unmute all").exclude = "unmute"
 
         ## fixing
-        row = box.row()
+        subbox = box.box()
+        row = subbox.row()
         row.label(text="Fix:")
-        grid = box.grid_flow(
+        grid = subbox.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
 
         ### colorspace
@@ -602,9 +609,14 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
+    Scene.retico_mtl_check_only_selected = BoolProperty(
+        name="Material tab use selected only",
+        description="Should Material operations only check selected objects?",
+        default = True
+    )
     Scene.retico_report_update_selection = BoolProperty(
         name="Report update selection",
-        description="Report update selection",
+        description="Should reports also update your selection?",
         default = False
     )
 
@@ -614,6 +626,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
     del Scene.retico_report_update_selection
+    del Scene.retico_mtl_check_only_selected
 
 if __name__ == "__main__":
     register()

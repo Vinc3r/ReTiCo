@@ -8,3 +8,5 @@ Current changes in [source folder](https://github.com/Vinc3r/BlenderScripts/tree
 - objects using multimaterials can be reported [#52](https://github.com/Vinc3r/ReTiCo/issues/52)
 - objects sharing materials can be reported [#54](https://github.com/Vinc3r/ReTiCo/issues/54)
 - some reports can modify selection if needed [#55](https://github.com/Vinc3r/ReTiCo/issues/55)
+- Materials -> UI cleaning
+- Materials -> ability to check only selected objects or not
