@@ -98,7 +98,9 @@ def gltf_fix_colorspace():
                             # output have to pass test
                             continue
                         for link in out.links:
-                            if link.to_node.type == 'BSDF_PRINCIPLED' or \
+                            # only albedo and emit are sRGB
+                            if (link.to_node.type == 'BSDF_PRINCIPLED' and \
+                                    link.to_socket.name == 'Base Color') or \
                                     link.to_node.type == 'EMISSION':
                                 node.image.colorspace_settings.name = 'sRGB'
                             else:
