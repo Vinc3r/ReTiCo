@@ -158,7 +158,7 @@ def gltf_fix_uvnode_naming(operator):
                         # random naming, can't guess
                         else:
                             naming_issue = True
-                            
+
                 if naming_issue:
                     materials_error += "{} ({}), ".format(mat.name, obj.name)
 
@@ -171,7 +171,7 @@ def gltf_fix_uvnode_naming(operator):
 
 def gltf_mute_textures(exclude="albedo"):
 
-    # no_muting_condition = [node.type, node.output.type, node.output.link.to_node.type]
+    # no_muting_condition = [node.type, node.outputs.type, node.outputs.links.to_node.type]
     # default: albedo
     no_muting_condition = ['TEX_IMAGE', 'RGBA', 'BSDF_PRINCIPLED']
     if exclude == "orm":
@@ -188,7 +188,20 @@ def gltf_mute_textures(exclude="albedo"):
         for mat in mesh.materials:
             if mat.use_nodes:
                 for node in mat.node_tree.nodes:
-                    if node.type != no_muting_condition[0]:
+                    emit_nodes = False
+                    if node.type == 'EMISSION':
+                        emit_nodes = True
+                    if node.type == 'ADD_SHADER' and node.inputs:
+                        for inp in node.inputs:
+                            if emit_nodes:
+                                # no need to go further if True
+                                continue
+                            if inp.links:
+                                for link in inp.links:
+                                    if link.from_node.type == 'EMISSION':
+                                        emit_nodes = True
+                                        continue
+                    if node.type != no_muting_condition[0] and not emit_nodes:
                         # node have to pass first tests
                         continue
                     if exclude == "unmute":
@@ -197,17 +210,34 @@ def gltf_mute_textures(exclude="albedo"):
                         continue
                     # muting by default, then unmute exception
                     node.mute = True
+                    if node.type == 'ADD_SHADER':
+                        # emit exception when muting all
+                        node.mute = False
                     if exclude != "mute":
                         for out in node.outputs:
-                            if out.type != no_muting_condition[1]:
+                            if out.type != no_muting_condition[1] and not emit_nodes:
                                 # output have to pass test
                                 continue
-                            for link in out.links:
-                                if link.to_node.type != no_muting_condition[2]:
-                                    # link have to pass test
+                            if emit_nodes and exclude == "emit":
+                                if node.type == 'ADD_SHADER':
+                                    node.mute = True
                                     continue
-                                # ok we're sure about this node, let's unmute
-                                node.mute = False
+                                elif node.type == 'EMISSION':
+                                    node.mute = False
+                                    continue
+                            else:
+                                if node.type == 'ADD_SHADER':
+                                    node.mute = False
+                                    continue
+                                elif node.type == 'EMISSION':
+                                    node.mute = True
+                                    continue
+                                for link in out.links:
+                                    if link.to_node.type != no_muting_condition[2]:
+                                        # link have to pass test
+                                        continue
+                                    # ok we're sure about this node, let's unmute
+                                    node.mute = False
     return {'FINISHED'}
 
 
