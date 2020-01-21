@@ -295,7 +295,6 @@ def report_several_materials():
         # no materials at all, don't care
         if not obj.data.materials:
             continue
-        # if index but without mat
         elif len(obj.data.materials) > 1:
             objects_several_mtl_name += "{}, ".format(obj.name)
 
@@ -305,6 +304,31 @@ def report_several_materials():
         message_several_mtl = "Multi materials on: {}".format(
             objects_several_mtl_name[:-2])  # removing last ", " charz
     return message_several_mtl, is_all_good
+
+
+def report_several_users():
+    objects_several_users_name = ""
+    message_several_users = ""
+    is_all_good = False
+
+    objects_selected = selection_sets.meshes_in_selection()
+
+    for obj in objects_selected:
+        # no materials at all, don't care
+        if not obj.data.materials:
+            continue
+        else:
+            for mat in obj.data.materials:
+                if mat.users > 1:
+                    objects_several_users_name += "{}, ".format(obj.name)
+                    continue
+
+    if len(objects_several_users_name) == 0:
+        is_all_good = True
+    else:
+        message_several_users = "Shared materials on: {}".format(
+            objects_several_users_name[:-2])  # removing last ", " charz
+    return message_several_users, is_all_good
 
 
 class RETICO_PT_material_panel(bpy.types.Panel):
@@ -344,10 +368,16 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row = box.row(align=True)
         row.operator("retico.material_transfer_names", text="Name from Object")
         # report
-        row = box.row(align=True)
+        row = box.row()
         row.label(text="Report: ")
+        grid = box.grid_flow(
+            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+        row = grid.row(align=True)        
         row.operator("retico.material_report_none", text="no Mat")
+        row = grid.row(align=True)
         row.operator("retico.material_report_several", text="1+ Mat")
+        row = grid.row(align=True)
+        row.operator("retico.material_report_users", text="Shared")
         # glTF workflow
         row = layout.row()
         row.label(text="glTF workflow:")
@@ -496,6 +526,26 @@ class RETICO_OT_material_report_several(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class RETICO_OT_material_report_users(bpy.types.Operator):
+    bl_idname = "retico.material_report_users"
+    bl_label = "Report object sharing materials"
+    bl_description = "Report object sharing materials, both in console and Info editor"
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.view_layer.objects) > 0
+
+    def execute(self, context):
+        message_several_users, is_all_good = report_several_users()
+        if is_all_good:
+            self.report({'INFO'}, "No material shared")
+        else:
+            if len(message_several_users) > 0:
+                self.report({'WARNING'}, message_several_users)
+
+        return {'FINISHED'}
+
+
 classes = (
     RETICO_PT_material_panel,
     RETICO_OT_material_backface,
@@ -506,6 +556,7 @@ classes = (
     RETICO_OT_material_gltf_uvnode_naming,
     RETICO_OT_material_report_none,
     RETICO_OT_material_report_several,
+    RETICO_OT_material_report_users,
 )
 
 
