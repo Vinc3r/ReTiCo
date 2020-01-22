@@ -55,6 +55,20 @@ def set_active_texture(type="albedo"):
                             # ok we're sure about this node, let's make it active
                             node.select = True
                             mat.node_tree.nodes.active = node
+
+    # update viewport
+    bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
+
+    if bpy.context.scene.retico_material_activeTex_viewShading_solid:
+        for area in bpy.context.screen.areas:
+            if area.type != 'VIEW_3D':
+                continue
+            for space in area.spaces:
+                if space.type != 'VIEW_3D':
+                    continue
+                space.shading.type = 'SOLID'
+                space.shading.color_type = 'TEXTURE'
+
     return {'FINISHED'}
 
 
@@ -400,7 +414,10 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         # active texture node
         subbox = box.box()
         row = subbox.row(align=True)
-        row.label(text="Activate texture node:")
+        row.label(text="Active texture node:")
+        row = subbox.row()
+        row.prop(context.scene, "retico_material_activeTex_viewShading_solid",
+                 text="set viewport shading")
         grid = subbox.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
@@ -632,13 +649,18 @@ def register():
         register_class(cls)
     Scene.retico_material_check_only_selected = BoolProperty(
         name="Material tab use selected only",
-        description="Should Material operations only check selected objects?",
+        description="Material operations applies on selection, or not",
         default=True
     )
     Scene.retico_material_report_update_selection = BoolProperty(
         name="Report update selection",
-        description="Should reports also update your selection?",
+        description="Reports applies on selection, or not",
         default=False
+    )
+    Scene.retico_material_activeTex_viewShading_solid = BoolProperty(
+        name="Set 3DView shading to Solid -> Texture",
+        description="Set 3DView shading to Solid -> Texture",
+        default=True
     )
 
 
@@ -648,6 +670,7 @@ def unregister():
         unregister_class(cls)
     del Scene.retico_material_report_update_selection
     del Scene.retico_material_check_only_selected
+    del Scene.retico_material_activeTex_viewShading_solid
 
 
 if __name__ == "__main__":

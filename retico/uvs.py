@@ -331,7 +331,7 @@ def register():
         register_class(cls)
     Scene.retico_uvs_check_only_selected = BoolProperty(
         name="UVs tab use selected only",
-        description="Should Uvs operations only check selected objects?",
+        description="Uvs operations applies on selection, or not",
         default=True
     )
     Scene.retico_box_mapping_size = FloatProperty(
@@ -342,7 +342,7 @@ def register():
     )
     Scene.retico_uvs_report_update_selection = BoolProperty(
         name="Report update selection",
-        description="Should reports also update your selection?",
+        description="Reports update selection, or not",
         default=False
     )
 

@@ -170,7 +170,7 @@ def register():
         register_class(cls)
     Scene.retico_mesh_check_only_selected = BoolProperty(
         name="Mesh tab use selected only",
-        description="Should Mesh operations only check selected objects?",
+        description="Mesh operations applies on selection, or not",
         default=True
     )
     Scene.retico_autosmooth_angle = FloatProperty(
