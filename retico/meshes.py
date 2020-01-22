@@ -126,11 +126,11 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
         row = box.row()
         row.prop(context.scene, "retico_material_report_update_selection",
                  text="update selection")
-        """
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.mesh_report_instances", text="instances")
+        """
 
 
 class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
