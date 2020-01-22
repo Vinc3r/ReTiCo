@@ -12,8 +12,9 @@ from bpy.props import (
 )
 
 
-def meshes_names_to_clipboard(selected_only=True):
+def meshes_names_to_clipboard():
     meshes_names_to_clipboard = ""
+    selected_only = bpy.context.scene.retico_mesh_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
 
@@ -26,10 +27,11 @@ def meshes_names_to_clipboard(selected_only=True):
     return {'FINISHED'}
 
 
-def transfer_names(selected_only=True):
+def transfer_names():
     # handling active object
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
+    selected_only = bpy.context.scene.retico_mesh_check_only_selected
 
     if bpy.context.view_layer.objects.active.mode == 'EDIT':
         is_user_in_edit_mode = True
@@ -52,10 +54,11 @@ def transfer_names(selected_only=True):
     return {'FINISHED'}
 
 
-def set_autosmooth(selected_only=True, user_angle=85):
+def set_autosmooth(user_angle=85):
     # handling active object
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
+    selected_only = bpy.context.scene.retico_mesh_check_only_selected
 
     if bpy.context.view_layer.objects.active.mode == 'EDIT':
         is_user_in_edit_mode = True
@@ -79,6 +82,10 @@ def set_autosmooth(selected_only=True, user_angle=85):
     if is_user_in_edit_mode:
         bpy.ops.object.mode_set(mode='EDIT')
 
+    return {'FINISHED'}
+
+def report_instances():
+    print("youpi yop")
     return {'FINISHED'}
 
 
@@ -111,6 +118,20 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
         row.operator("retico.mesh_name_to_clipboard",
                      text="Copy names to clipboard")
 
+        # report
+        box = layout.box()
+        row = box.row()
+        row.label(text="Report:")
+        """TODO
+        row = box.row()
+        row.prop(context.scene, "retico_material_report_update_selection",
+                 text="update selection")
+        """
+        grid = box.grid_flow(
+            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+        row = grid.row(align=True)
+        row.operator("retico.mesh_report_instances", text="instances")
+
 
 class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
     bl_idname = "retico.mesh_name_to_clipboard"
@@ -122,8 +143,7 @@ class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        meshes_names_to_clipboard(
-            bpy.context.scene.retico_mesh_check_only_selected)
+        meshes_names_to_clipboard()
         return {'FINISHED'}
 
 
@@ -137,7 +157,7 @@ class RETICO_OT_mesh_transfer_names(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        transfer_names(bpy.context.scene.retico_mesh_check_only_selected)
+        transfer_names()
         return {'FINISHED'}
 
 
@@ -151,8 +171,21 @@ class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        set_autosmooth(bpy.context.scene.retico_mesh_check_only_selected,
-                       context.scene.retico_autosmooth_angle)
+        set_autosmooth(context.scene.retico_autosmooth_angle)
+        return {'FINISHED'}
+
+
+class RETICO_OT_mesh_report_instances(bpy.types.Operator):
+    bl_idname = "retico.mesh_report_instances"
+    bl_label = "List objects using instances"
+    bl_description = "List objects using instances"
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.view_layer.objects) > 0
+
+    def execute(self, context):
+        report_instances()
         return {'FINISHED'}
 
 
@@ -161,6 +194,7 @@ classes = (
     RETICO_OT_mesh_transfer_names,
     RETICO_OT_mesh_set_autosmooth,
     RETICO_OT_mesh_name_to_clipboard,
+    RETICO_OT_mesh_report_instances,
 )
 
 

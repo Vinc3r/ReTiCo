@@ -12,8 +12,8 @@ from bpy.props import (
 
 
 def set_backface_culling(mode):
-    objects_selected = selection_sets.meshes_with_materials(
-        bpy.context.scene.retico_material_check_only_selected)
+    selected_only = bpy.context.scene.retico_material_check_only_selected
+    objects_selected = selection_sets.meshes_with_materials(selected_only)
     for obj in objects_selected:
         for mat in obj.data.materials:
             if mat is not None:
@@ -22,6 +22,7 @@ def set_backface_culling(mode):
 
 
 def set_active_texture(type="albedo"):
+    selected_only = bpy.context.scene.retico_material_check_only_selected
 
     # texture_condition = [node.type, node.output.type, node.output.link.to_node.type]
     # default: albedo
@@ -33,8 +34,7 @@ def set_active_texture(type="albedo"):
     elif type == "emit":
         texture_condition = ['TEX_IMAGE', 'RGBA', 'EMISSION']
 
-    objects_selected = selection_sets.meshes_with_materials(
-        bpy.context.scene.retico_material_check_only_selected)
+    objects_selected = selection_sets.meshes_with_materials(selected_only)
 
     for obj in objects_selected:
         mesh = obj.data
@@ -76,13 +76,14 @@ def transfer_names():
     # handling active object
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
+    selected_only = bpy.context.scene.retico_material_check_only_selected
     if bpy.context.view_layer.objects.active.mode == 'EDIT':
         is_user_in_edit_mode = True
         bpy.ops.object.mode_set(mode='OBJECT')
 
     # function core
     objects_selected = selection_sets.meshes_in_selection(
-    ) if bpy.context.scene.retico_material_check_only_selected else selection_sets.meshes_selectable()
+    ) if selected_only else selection_sets.meshes_selectable()
     for obj in objects_selected:
         object_materials = obj.data.materials
         if len(object_materials) > 0:
@@ -101,8 +102,8 @@ def transfer_names():
 
 
 def gltf_fix_colorspace():
-    objects_selected = selection_sets.meshes_with_materials(
-        bpy.context.scene.retico_material_check_only_selected)
+    selected_only = bpy.context.scene.retico_material_check_only_selected
+    objects_selected = selection_sets.meshes_with_materials(selected_only)
 
     for obj in objects_selected:
         mesh = obj.data
@@ -128,8 +129,8 @@ def gltf_fix_colorspace():
 
 
 def gltf_fix_uvnode_naming(operator):
-    objects_selected = selection_sets.meshes_with_materials(
-        bpy.context.scene.retico_material_check_only_selected)
+    selected_only = bpy.context.scene.retico_material_check_only_selected
+    objects_selected = selection_sets.meshes_with_materials(selected_only)
     materials_error = ""
     naming_issue = False
 
@@ -194,6 +195,7 @@ def gltf_fix_uvnode_naming(operator):
 
 
 def gltf_mute_textures(exclude="albedo"):
+    selected_only = bpy.context.scene.retico_material_check_only_selected
 
     # no_muting_condition = [node.type, node.outputs.type, node.outputs.links.to_node.type]
     # default: albedo
@@ -205,8 +207,7 @@ def gltf_mute_textures(exclude="albedo"):
     elif exclude == "emit":
         no_muting_condition = ['TEX_IMAGE', 'RGBA', 'EMISSION']
 
-    objects_selected = selection_sets.meshes_with_materials(
-        bpy.context.scene.retico_material_check_only_selected)
+    objects_selected = selection_sets.meshes_with_materials(selected_only)
 
     for obj in objects_selected:
         mesh = obj.data
@@ -266,7 +267,7 @@ def gltf_mute_textures(exclude="albedo"):
     return {'FINISHED'}
 
 
-def report_no_materials(update_selection=False):
+def report_no_materials():
     objects_without_mtl = []
     objects_without_mtl_name = ""
     message_without_mtl = ""
@@ -274,9 +275,11 @@ def report_no_materials(update_selection=False):
     objects_index_without_mtl_name = ""
     message_index = ""
     is_all_good = False
+    update_selection = bpy.context.scene.retico_material_report_update_selection
+    selected_only = bpy.context.scene.retico_material_check_only_selected
 
     objects_selected = selection_sets.meshes_in_selection(
-    ) if bpy.context.scene.retico_material_check_only_selected else selection_sets.meshes_selectable()
+    ) if selected_only else selection_sets.meshes_selectable()
 
     for obj in objects_selected:
         # no materials at all
@@ -316,14 +319,16 @@ def report_no_materials(update_selection=False):
     return message_without_mtl, message_index, is_all_good
 
 
-def report_several_materials(update_selection):
+def report_several_materials():
     objects_several_mtl = []
     objects_several_mtl_name = ""
     message_several_mtl = ""
     is_all_good = False
+    update_selection = bpy.context.scene.retico_material_report_update_selection
+    selected_only = bpy.context.scene.retico_material_check_only_selected
 
     objects_selected = selection_sets.meshes_in_selection(
-    ) if bpy.context.scene.retico_material_check_only_selected else selection_sets.meshes_selectable()
+    ) if selected_only else selection_sets.meshes_selectable()
 
     for obj in objects_selected:
         # no materials at all, don't care
@@ -348,14 +353,16 @@ def report_several_materials(update_selection):
     return message_several_mtl, is_all_good
 
 
-def report_several_users(update_selection):
+def report_several_users():
     objects_several_users = []
     objects_several_users_name = ""
     message_several_users = ""
     is_all_good = False
+    update_selection = bpy.context.scene.retico_material_report_update_selection
+    selected_only = bpy.context.scene.retico_material_check_only_selected
 
     objects_selected = selection_sets.meshes_in_selection(
-    ) if bpy.context.scene.retico_material_check_only_selected else selection_sets.meshes_selectable()
+    ) if selected_only else selection_sets.meshes_selectable()
 
     for obj in objects_selected:
         # no materials at all, don't care
@@ -436,7 +443,7 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         # report
         box = layout.box()
         row = box.row()
-        row.label(text="Report: ")
+        row.label(text="Report:")
         row = box.row()
         row.prop(context.scene, "retico_material_report_update_selection",
                  text="update selection")
@@ -574,8 +581,7 @@ class RETICO_OT_material_report_none(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message_without_mtl, message_index, is_all_good = report_no_materials(
-            context.scene.retico_material_report_update_selection)
+        message_without_mtl, message_index, is_all_good = report_no_materials()
         if is_all_good:
             self.report({'INFO'}, "All meshes have materials")
         else:
@@ -597,8 +603,7 @@ class RETICO_OT_material_report_several(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message_several_mtl, is_all_good = report_several_materials(
-            context.scene.retico_material_report_update_selection)
+        message_several_mtl, is_all_good = report_several_materials()
         if is_all_good:
             self.report({'INFO'}, "No multi-material found")
         else:
@@ -618,8 +623,7 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message_several_users, is_all_good = report_several_users(
-            context.scene.retico_material_report_update_selection)
+        message_several_users, is_all_good = report_several_users()
         if is_all_good:
             self.report({'INFO'}, "No material shared")
         else:

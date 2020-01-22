@@ -14,7 +14,8 @@ from bpy.props import (
 )
 
 
-def rename_uv_channels(selected_only=True):
+def rename_uv_channels():
+    selected_only = bpy.context.scene.retico_uvs_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
 
@@ -31,7 +32,8 @@ def rename_uv_channels(selected_only=True):
     return {'FINISHED'}
 
 
-def activate_uv_channels(selected_only=True, uv_chan=0):
+def activate_uv_channels(uv_chan=0):
+    selected_only = bpy.context.scene.retico_uvs_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
 
@@ -52,11 +54,12 @@ def activate_uv_channels(selected_only=True, uv_chan=0):
     return {'FINISHED'}
 
 
-def report_no_uv(update_selection=False, channel=0):
+def report_no_uv(channel=0):
     objects_no_uv = []
     obj_no_uv_names: str = ""
     message_suffix = "no UV on:"
     is_all_good = False
+    update_selection = bpy.context.scene.retico_uvs_report_update_selection
     selected_only = bpy.context.scene.retico_uvs_check_only_selected
 
     if channel == 1:
@@ -91,7 +94,8 @@ def report_no_uv(update_selection=False, channel=0):
     return message[:-2], is_all_good
 
 
-def box_mapping(selected_only=True, size=1.0):
+def box_mapping(size=1.0):
+    selected_only = bpy.context.scene.retico_uvs_check_only_selected
     """ This apply a box mapping into UV channel 0.
     """
     objects_selected = selection_sets.meshes_in_selection(
@@ -227,7 +231,7 @@ class RETICO_PT_uv_panel(bpy.types.Panel):
         # report
         box = layout.box()
         row = box.row(align=True)
-        row.label(text="Report: ")
+        row.label(text="Report:")
         row = box.row()
         row.prop(context.scene, "retico_uvs_report_update_selection",
                  text="update selection")
@@ -250,12 +254,10 @@ class RETICO_OT_uv_activate_channel(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message, is_all_good = report_no_uv(
-            context.scene.retico_uvs_check_only_selected, self.channel)
+        message, is_all_good = report_no_uv(self.channel)
         if not is_all_good:
             self.report({'WARNING'}, "{}... Now fixed!".format(message))
-        activate_uv_channels(
-            context.scene.retico_uvs_check_only_selected, self.channel)
+        activate_uv_channels(self.channel)
 
         return {'FINISHED'}
 
@@ -270,12 +272,10 @@ class RETICO_OT_uv_box_mapping(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message, is_all_good = report_no_uv(
-            context.scene.retico_uvs_check_only_selected, 0)
+        message, is_all_good = report_no_uv(0)
         if not is_all_good:
             self.report({'WARNING'}, "{}... Now fixed!".format(message))
-        box_mapping(context.scene.retico_uvs_check_only_selected,
-                    context.scene.retico_box_mapping_size)
+        box_mapping(context.scene.retico_box_mapping_size)
 
         return {'FINISHED'}
 
@@ -290,7 +290,7 @@ class RETICO_OT_uv_rename_channel(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        rename_uv_channels(context.scene.retico_uvs_check_only_selected)
+        rename_uv_channels()
 
         return {'FINISHED'}
 
