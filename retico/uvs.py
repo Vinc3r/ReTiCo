@@ -73,8 +73,18 @@ def report_no_uv(update_selection=False, channel=0):
             message = "All your meshes have UV1."
         is_all_good = True
     else:
+        if update_selection:
+            for obj in bpy.context.selected_objects:
+                obj.select_set(False)
+
         for obj in objects_no_uv:
             obj_no_uv_names += "{}, ".format(obj.name)
+            if update_selection:
+                obj.select_set(True)
+
+        if update_selection:
+            bpy.context.view_layer.objects.active = objects_no_uv[0]
+
         message = "{} {}".format(message_suffix, obj_no_uv_names)
 
     # removing last ", " charz
@@ -219,9 +229,8 @@ class RETICO_PT_uv_panel(bpy.types.Panel):
         row = box.row(align=True)
         row.label(text="Report: ")
         row = box.row()
-        # TODO
-        # row.prop(context.scene, "retico_uvs_report_update_selection",
-        #         text="update selection")
+        row.prop(context.scene, "retico_uvs_report_update_selection",
+                 text="update selection")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
