@@ -15,6 +15,8 @@
 
 ReTiCo tools are now available in `3DView` > `Sidebar` > `ReTiCo` tab.
 
+As I develop mainlky using last official Blender version, at activation you may seen this kind of warning: `This script was written Blender version 2.81.0 and migt not function (correctly), though it is enabled`. Don't worry, it should be OK.
+
 ## Documentation
 
 This addon was made to help 3D realtime workflows, and also glTF import/export.
