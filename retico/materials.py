@@ -487,22 +487,6 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row.operator("retico.material_active_texture",
                      text="Emissive").texture_type = "emit"
 
-        # report
-        box = layout.box()
-        row = box.row()
-        row.label(text="Report:")
-        row = box.row()
-        row.prop(context.scene, "retico_material_reports_update_selection",
-                 text="update selection")
-        grid = box.grid_flow(
-            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
-        row = grid.row(align=True)
-        row.operator("retico.material_report_none", text="no Mat")
-        row = grid.row(align=True)
-        row.operator("retico.material_report_several", text="1+ Mat")
-        row = grid.row(align=True)
-        row.operator("retico.material_report_users", text="Shared")
-
         # glTF workflow
         box = layout.box()
         row = box.row()
@@ -549,6 +533,24 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         # uv nodes
         row = grid.row(align=True)
         row.operator("retico.material_gltf_uvnode_naming", text="UV links")
+
+        # report
+        box = layout.box()
+        row = box.row()
+        row.label(text="Report:")
+        row = box.row()
+        row.prop(context.scene, "retico_material_reports_update_selection",
+                 text="update selection")
+        row.prop(context.scene, "retico_material_reports_to_clipboard",
+                 text="to clipboard")
+        grid = box.grid_flow(
+            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+        row = grid.row(align=True)
+        row.operator("retico.material_report_none", text="no Mat")
+        row = grid.row(align=True)
+        row.operator("retico.material_report_several", text="1+ Mat")
+        row = grid.row(align=True)
+        row.operator("retico.material_report_users", text="Shared")
 
 
 class RETICO_OT_material_backface(bpy.types.Operator):
@@ -633,9 +635,15 @@ class RETICO_OT_material_report_none(bpy.types.Operator):
         if is_all_good:
             self.report({'INFO'}, "All meshes have materials")
         else:
+            to_clipboard = context.scene.retico_material_reports_to_clipboard
             if len(message_without_mtl) > 0:
+                if to_clipboard:
+                    context.window_manager.clipboard = message_without_mtl
                 self.report({'WARNING'}, message_without_mtl)
             if len(message_index) > 0:
+                if to_clipboard:
+                    context.window_manager.clipboard += "\r\n{}".format(
+                        message_index)
                 self.report({'WARNING'}, message_index)
 
         return {'FINISHED'}
@@ -657,6 +665,8 @@ class RETICO_OT_material_report_several(bpy.types.Operator):
             self.report({'INFO'}, "No multi-material found")
         else:
             if len(message_several_mtl) > 0:
+                if context.scene.retico_material_reports_to_clipboard:
+                    context.window_manager.clipboard = message_several_mtl
                 self.report({'WARNING'}, message_several_mtl)
 
         return {'FINISHED'}
@@ -678,6 +688,8 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
             self.report({'INFO'}, "No material shared")
         else:
             if len(message_several_users) > 0:
+                if context.scene.retico_material_reports_to_clipboard:
+                    context.window_manager.clipboard = message_several_users
                 self.report({'WARNING'}, message_several_users)
 
         return {'FINISHED'}
@@ -711,6 +723,11 @@ def register():
         description="Reports applies on selection, or not",
         default=False
     )
+    Scene.retico_material_reports_to_clipboard = BoolProperty(
+        name="Reports sent to clipboard",
+        description="Reports sent to clipboard",
+        default=False
+    )
     Scene.retico_material_activeTex_viewShading_solid = BoolProperty(
         name="Set 3DView shading to Solid -> Texture",
         description="Set 3DView shading to Solid -> Texture",
@@ -723,6 +740,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
     del Scene.retico_material_reports_update_selection
+    del Scene.retico_material_reports_to_clipboard
     del Scene.retico_material_check_only_selected
     del Scene.retico_material_activeTex_viewShading_solid
 

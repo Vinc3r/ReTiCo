@@ -13,6 +13,8 @@ from bpy.props import (
 
 
 def meshes_names_to_clipboard():
+    """ Send object names to clipboard using "name", "name", "name", pattern
+    """
     # var init
     meshes_names_to_clipboard = ""
     selected_only = bpy.context.scene.retico_mesh_check_only_selected
@@ -32,7 +34,7 @@ def meshes_names_to_clipboard():
 
 
 def transfer_names():
-    """
+    """ Copy object name to mesh name
     """
     # var init
     user_active = bpy.context.view_layer.objects.active
@@ -205,6 +207,8 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
         row = box.row()
         row.prop(context.scene, "retico_mesh_reports_update_selection",
                  text="update selection")
+        row.prop(context.scene, "retico_mesh_reports_to_clipboard",
+                 text="to clipboard")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
@@ -273,7 +277,12 @@ class RETICO_OT_mesh_report_instances(bpy.types.Operator):
         if not message:
             self.report({'INFO'}, "No instances detected.")
         else:
+            to_clipboard = context.scene.retico_mesh_reports_to_clipboard
+            if to_clipboard:
+                context.window_manager.clipboard = ""
             for report in message:
+                if to_clipboard:
+                    context.window_manager.clipboard += "\r\n{}".format(report)
                 self.report({'INFO'}, report)
         return {'FINISHED'}
 
@@ -301,6 +310,11 @@ def register():
         description="Reports applies on selection, or not",
         default=False
     )
+    Scene.retico_mesh_reports_to_clipboard = BoolProperty(
+        name="Reports sent to clipboard",
+        description="Reports sent to clipboard",
+        default=False
+    )
     Scene.retico_mesh_autosmooth_angle = FloatProperty(
         name="autosmooth angle",
         description="autosmooth angle",
@@ -322,6 +336,7 @@ def unregister():
 
     del Scene.retico_mesh_autosmooth_angle
     del Scene.retico_mesh_reports_update_selection
+    del Scene.retico_mesh_reports_to_clipboard
     del Scene.retico_mesh_check_only_selected
     del Scene.retico_mesh_autosmooth_del_customs
 

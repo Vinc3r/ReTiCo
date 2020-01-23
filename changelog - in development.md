@@ -9,6 +9,7 @@ Usually in-dev version is usable... but bugs can appears of course.
 - Reports can modify selection if needed [#55](https://github.com/Vinc3r/ReTiCo/issues/55)
 - UI cleaning
 - Ability to operate only on selected objects, or not
+- reports can be sent to clipboard
 
 ### Materials
 

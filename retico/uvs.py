@@ -259,6 +259,8 @@ class RETICO_PT_uv_panel(bpy.types.Panel):
         row = box.row()
         row.prop(context.scene, "retico_uvs_report_update_selection",
                  text="update selection")
+        row.prop(context.scene, "retico_uvs_reports_to_clipboard",
+                 text="to clipboard")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
@@ -301,7 +303,8 @@ class RETICO_OT_uv_box_mapping(bpy.types.Operator):
         message, is_all_good = report_no_uv(0)
         self.report({'INFO'}, "---[ Box mapping ]---")
         if not is_all_good:
-            self.report({'WARNING'}, "{}... Now fixed!".format(message))
+            message = "{}... Now fixed!".format(message)
+            self.report({'WARNING'}, message)
         box_mapping(context.scene.retico_box_mapping_size)
 
         return {'FINISHED'}
@@ -336,6 +339,8 @@ class RETICO_OT_uv_report_none(bpy.types.Operator):
     def execute(self, context):
         message, is_all_good = report_no_uv(self.channel)
         self.report({'INFO'}, "---[ no-UV detection ]---")
+        if context.scene.retico_uvs_report_update_selection:
+            context.window_manager.clipboard = message
         if is_all_good:
             self.report({'INFO'}, message)
         else:
@@ -373,6 +378,11 @@ def register():
         description="Reports update selection, or not",
         default=False
     )
+    Scene.retico_uvs_reports_to_clipboard = BoolProperty(
+        name="Reports sent to clipboard",
+        description="Reports sent to clipboard",
+        default=False
+    )
 
 
 def unregister():
@@ -383,6 +393,7 @@ def unregister():
     del Scene.retico_box_mapping_size
     del Scene.retico_uvs_check_only_selected
     del Scene.retico_uvs_report_update_selection
+    del Scene.retico_uvs_reports_to_clipboard
 
 
 if __name__ == "__main__":
