@@ -15,10 +15,14 @@ from bpy.props import (
 
 
 def rename_uv_channels():
+    """ Rename UV chans using "UVMap", "UV2", "UV3", "UVx" pattern
+    """
+    # var init
     selected_only = bpy.context.scene.retico_uvs_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
 
+    # function core
     for obj in objects_selected:
         mesh = obj.data
         if len(mesh.uv_layers) < 0:
@@ -33,10 +37,14 @@ def rename_uv_channels():
 
 
 def activate_uv_channels(uv_chan=0):
+    """ Make active UV chan 1 or 2
+    """
+    # var init
     selected_only = bpy.context.scene.retico_uvs_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
 
+    # function core
     for obj in objects_selected:
         mesh = obj.data
         if len(mesh.uv_layers) == 0 or \
@@ -55,6 +63,9 @@ def activate_uv_channels(uv_chan=0):
 
 
 def report_no_uv(channel=0):
+    """ Tell user if objects have UV1 or UV2
+    """
+    # var init
     objects_no_uv = []
     obj_no_uv_names: str = ""
     message_suffix = "no UV on:"
@@ -62,6 +73,7 @@ def report_no_uv(channel=0):
     update_selection = bpy.context.scene.retico_uvs_report_update_selection
     selected_only = bpy.context.scene.retico_uvs_check_only_selected
 
+    # function core
     if channel == 1:
         # UV2 check
         objects_no_uv = selection_sets.meshes_without_uv(selected_only)[1]
@@ -69,6 +81,7 @@ def report_no_uv(channel=0):
     else:
         # ask to report no UV at all
         objects_no_uv = selection_sets.meshes_without_uv(selected_only)[0]
+
     if len(objects_no_uv) == 0:
         if channel == 1:
             message = "All your meshes have UV2."
@@ -95,17 +108,21 @@ def report_no_uv(channel=0):
 
 
 def box_mapping(size=1.0):
-    selected_only = bpy.context.scene.retico_uvs_check_only_selected
-    """ This apply a box mapping into UV channel 0.
+    """ Apply a box mapping into UV channel 0.
+        Add UV1 if not exists.
     """
+    # var init
+    selected_only = bpy.context.scene.retico_uvs_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
 
+    # handling active object
     if bpy.context.view_layer.objects.active.mode == 'EDIT':
         is_user_in_edit_mode = True
 
+    # function core
     for obj in objects_selected:
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.context.view_layer.objects.active = obj
@@ -117,6 +134,8 @@ def box_mapping(size=1.0):
         mesh_box_mapping(mesh, size, is_user_in_edit_mode)
 
     bpy.ops.object.mode_set(mode='OBJECT')
+
+    # handling active object
     bpy.context.view_layer.objects.active = user_active
     if is_user_in_edit_mode:
         bpy.ops.object.mode_set(mode='EDIT')
@@ -125,10 +144,10 @@ def box_mapping(size=1.0):
 
 
 def mesh_box_mapping(mesh, size=1.0, only_selected=False):
-    """ This function is shamefully copy-pasted from MagicUV addon (UVW function)
+    """ Shamefully copy-pasted from MagicUV addon (UVW function)
         and rudely adapt for my needs.
     """
-
+    # var init
     offset = [0.0, 0.0, 0.0]
     rotation = [0.0, 0.0, 0.0]
     tex_aspect = 1.0
@@ -197,6 +216,8 @@ def mesh_box_mapping(mesh, size=1.0, only_selected=False):
 
     bmesh.update_edit_mesh(mesh)
     bm.free()
+
+    return {'FINISHED'}
 
 
 class RETICO_PT_uv_panel(bpy.types.Panel):
