@@ -19,3 +19,7 @@ Usually in-dev version is usable... but bugs can appears of course.
 - objects sharing materials can be reported [#54](https://github.com/Vinc3r/ReTiCo/issues/54)
 - active texture operations can set viewport shading to Solid -> Texture mode
 - backface culling only act when in viewport shading solid [#58](https://github.com/Vinc3r/ReTiCo/issues/58)
+
+### Meshes
+
+- new report: detect instanced meshes

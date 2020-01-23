@@ -314,7 +314,7 @@ def report_no_materials():
     objects_index_without_mtl_name = ""
     message_index = ""
     is_all_good = False
-    update_selection = bpy.context.scene.retico_material_report_update_selection
+    update_selection = bpy.context.scene.retico_material_reports_update_selection
     selected_only = bpy.context.scene.retico_material_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
@@ -366,7 +366,7 @@ def report_several_materials():
     objects_several_mtl_name = ""
     message_several_mtl = ""
     is_all_good = False
-    update_selection = bpy.context.scene.retico_material_report_update_selection
+    update_selection = bpy.context.scene.retico_material_reports_update_selection
     selected_only = bpy.context.scene.retico_material_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
@@ -404,7 +404,7 @@ def report_several_users():
     objects_several_users_name = ""
     message_several_users = ""
     is_all_good = False
-    update_selection = bpy.context.scene.retico_material_report_update_selection
+    update_selection = bpy.context.scene.retico_material_reports_update_selection
     selected_only = bpy.context.scene.retico_material_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
@@ -492,7 +492,7 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row = box.row()
         row.label(text="Report:")
         row = box.row()
-        row.prop(context.scene, "retico_material_report_update_selection",
+        row.prop(context.scene, "retico_material_reports_update_selection",
                  text="update selection")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
@@ -629,6 +629,7 @@ class RETICO_OT_material_report_none(bpy.types.Operator):
 
     def execute(self, context):
         message_without_mtl, message_index, is_all_good = report_no_materials()
+        self.report({'INFO'}, "---[ Objects without materials ]---")
         if is_all_good:
             self.report({'INFO'}, "All meshes have materials")
         else:
@@ -651,6 +652,7 @@ class RETICO_OT_material_report_several(bpy.types.Operator):
 
     def execute(self, context):
         message_several_mtl, is_all_good = report_several_materials()
+        self.report({'INFO'}, "---[ Objects with multimaterials ]---")
         if is_all_good:
             self.report({'INFO'}, "No multi-material found")
         else:
@@ -671,6 +673,7 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
 
     def execute(self, context):
         message_several_users, is_all_good = report_several_users()
+        self.report({'INFO'}, "---[ Objects sharing materials ]---")
         if is_all_good:
             self.report({'INFO'}, "No material shared")
         else:
@@ -703,7 +706,7 @@ def register():
         description="Material operations applies on selection, or not",
         default=True
     )
-    Scene.retico_material_report_update_selection = BoolProperty(
+    Scene.retico_material_reports_update_selection = BoolProperty(
         name="Report update selection",
         description="Reports applies on selection, or not",
         default=False
@@ -719,7 +722,7 @@ def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
-    del Scene.retico_material_report_update_selection
+    del Scene.retico_material_reports_update_selection
     del Scene.retico_material_check_only_selected
     del Scene.retico_material_activeTex_viewShading_solid
 

@@ -104,7 +104,10 @@ def report_no_uv(channel=0):
         message = "{} {}".format(message_suffix, obj_no_uv_names)
 
     # removing last ", " charz
-    return message[:-2], is_all_good
+    if not is_all_good:
+        message = message[:-2]
+
+    return message, is_all_good
 
 
 def box_mapping(size=1.0):
@@ -259,9 +262,9 @@ class RETICO_PT_uv_panel(bpy.types.Panel):
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
-        row.operator("retico.uv_report_none", text="no UV").channel = 0
+        row.operator("retico.uv_report_none", text="no UV1").channel = 0
         row = grid.row(align=True)
-        row.operator("retico.uv_report_none", text="2").channel = 1
+        row.operator("retico.uv_report_none", text="no UV2").channel = 1
 
 
 class RETICO_OT_uv_activate_channel(bpy.types.Operator):
@@ -276,6 +279,8 @@ class RETICO_OT_uv_activate_channel(bpy.types.Operator):
 
     def execute(self, context):
         message, is_all_good = report_no_uv(self.channel)
+        self.report(
+            {'INFO'}, "---[ UV{} activated ]---".format(self.channel + 1))
         if not is_all_good:
             self.report({'WARNING'}, "{}... Now fixed!".format(message))
         activate_uv_channels(self.channel)
@@ -294,6 +299,7 @@ class RETICO_OT_uv_box_mapping(bpy.types.Operator):
 
     def execute(self, context):
         message, is_all_good = report_no_uv(0)
+        self.report({'INFO'}, "---[ Box mapping ]---")
         if not is_all_good:
             self.report({'WARNING'}, "{}... Now fixed!".format(message))
         box_mapping(context.scene.retico_box_mapping_size)
@@ -312,6 +318,7 @@ class RETICO_OT_uv_rename_channel(bpy.types.Operator):
 
     def execute(self, context):
         rename_uv_channels()
+        self.report({'INFO'}, "---[ UV naming ]---")
 
         return {'FINISHED'}
 
@@ -327,8 +334,8 @@ class RETICO_OT_uv_report_none(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        message, is_all_good = report_no_uv(
-            context.scene.retico_uvs_report_update_selection, self.channel)
+        message, is_all_good = report_no_uv(self.channel)
+        self.report({'INFO'}, "---[ no-UV detection ]---")
         if is_all_good:
             self.report({'INFO'}, message)
         else:

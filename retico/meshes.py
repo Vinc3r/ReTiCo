@@ -32,6 +32,8 @@ def meshes_names_to_clipboard():
 
 
 def transfer_names():
+    """
+    """
     # var init
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
@@ -59,6 +61,8 @@ def transfer_names():
 
 
 def set_autosmooth(user_angle=85):
+    """ Activate autosmooth and delete custom normals if asked (TODO)
+    """
     # var init
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
@@ -75,8 +79,9 @@ def set_autosmooth(user_angle=85):
     for obj in objects_selected:
         bpy.context.view_layer.objects.active = obj
         mesh = obj.data
-        if mesh.has_custom_normals:
-            bpy.ops.mesh.customdata_custom_splitnormals_clear()
+        # if mesh.has_custom_normals:
+        # TODO
+        # bpy.ops.mesh.customdata_custom_splitnormals_clear()
         mesh.use_auto_smooth = True
         mesh.auto_smooth_angle = math.radians(user_angle)
         bpy.ops.object.shade_smooth()
@@ -90,14 +95,23 @@ def set_autosmooth(user_angle=85):
 
 
 def report_instances():
+    """ Report meshes using instances
+    """
     # var init
     obj_using_instance = []
     meshes_instanced = []
+    update_selection = bpy.context.scene.retico_mesh_reports_update_selection
     selected_only = bpy.context.scene.retico_mesh_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
+    report_message = []
 
     # function core
+
+    if update_selection:
+        for obj in bpy.context.selected_objects:
+            obj.select_set(False)
+
     for obj in objects_selected:
         mesh = obj.data
         already_exists = False
@@ -107,18 +121,25 @@ def report_instances():
         if mesh.users <= 1:
             continue
 
+        if update_selection:
+            # select those using instances
+            obj.select_set(True)
+
         # checking if instanced mesh already in list
         for mesh_inst_id in range(len(meshes_instanced)):
             if mesh == meshes_instanced[mesh_inst_id]:
                 already_exists = True
                 mesh_used_id = mesh_inst_id
                 continue
+        # if not, adding it and save instance id
         if not already_exists:
             meshes_instanced.append(mesh)
             mesh_inst_id = len(meshes_instanced) - 1
 
+        # saving [object, instance_used_id]
         obj_using_instance.append([obj, mesh_inst_id])
 
+    # for each instances, listing objects using it
     for mesh_inst_id in range(len(meshes_instanced)):
         obj_using_instance_list = []
         obj_using_instance_list_name = ""
@@ -128,10 +149,16 @@ def report_instances():
         for obj in obj_using_instance_list:
             obj_using_instance_list_name += "{}, ".format(obj.name)
 
-        print("{} is used by: {}".format(
+        report_message.append("{} used by: {}".format(
             meshes_instanced[mesh_inst_id].name, obj_using_instance_list_name)[:-2])
 
-    return {'FINISHED'}
+    if update_selection and len(meshes_instanced) > 0:
+        bpy.context.view_layer.objects.active = obj_using_instance[0][0]
+
+    if len(meshes_instanced) == 0:
+        return False
+    else:
+        return report_message
 
 
 class RETICO_PT_mesh_panel(bpy.types.Panel):
@@ -168,12 +195,12 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
         row = box.row()
         row.label(text="Report:")
         row = box.row()
-        row.prop(context.scene, "retico_mesh_report_update_selection",
+        row.prop(context.scene, "retico_mesh_reports_update_selection",
                  text="update selection")
         grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
-        row.operator("retico.mesh_report_instances", text="instances")
+        row.operator("retico.mesh_report_instances", text="Instances")
 
 
 class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
@@ -187,6 +214,8 @@ class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
 
     def execute(self, context):
         meshes_names_to_clipboard()
+        self.report({'INFO'}, "---[ Copied to clipboard ]---")
+
         return {'FINISHED'}
 
 
@@ -201,6 +230,8 @@ class RETICO_OT_mesh_transfer_names(bpy.types.Operator):
 
     def execute(self, context):
         transfer_names()
+        self.report({'INFO'}, "---[ Object name to Mesh ]---")
+
         return {'FINISHED'}
 
 
@@ -215,6 +246,7 @@ class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
 
     def execute(self, context):
         set_autosmooth(context.scene.retico_autosmooth_angle)
+        self.report({'INFO'}, "---[ Autosmooth ]---")
         return {'FINISHED'}
 
 
@@ -228,7 +260,13 @@ class RETICO_OT_mesh_report_instances(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        report_instances()
+        message = report_instances()
+        self.report({'INFO'}, "---[ Objects using instances ]---")
+        if not message:
+            self.report({'INFO'}, "No instances detected.")
+        else:
+            for report in message:
+                self.report({'INFO'}, report)
         return {'FINISHED'}
 
 
@@ -250,7 +288,7 @@ def register():
         description="Mesh operations applies on selection, or not",
         default=True
     )
-    Scene.retico_mesh_report_update_selection = BoolProperty(
+    Scene.retico_mesh_reports_update_selection = BoolProperty(
         name="Report update selection",
         description="Reports applies on selection, or not",
         default=False
@@ -270,7 +308,7 @@ def unregister():
         unregister_class(cls)
 
     del Scene.retico_autosmooth_angle
-    del Scene.retico_mesh_report_update_selection
+    del Scene.retico_mesh_reports_update_selection
     del Scene.retico_mesh_check_only_selected
 
 
