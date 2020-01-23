@@ -61,11 +61,12 @@ def transfer_names():
 
 
 def set_autosmooth(user_angle=85):
-    """ Activate autosmooth and delete custom normals if asked (TODO)
+    """ Activate autosmooth and delete custom normals if asked
     """
     # var init
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
+    delete_customs = bpy.context.scene.retico_mesh_autosmooth_del_customs
     selected_only = bpy.context.scene.retico_mesh_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
@@ -79,9 +80,11 @@ def set_autosmooth(user_angle=85):
     for obj in objects_selected:
         bpy.context.view_layer.objects.active = obj
         mesh = obj.data
-        # if mesh.has_custom_normals:
-        # TODO
-        # bpy.ops.mesh.customdata_custom_splitnormals_clear()
+
+        # custom normals
+        if delete_customs and mesh.has_custom_normals:
+            bpy.ops.mesh.customdata_custom_splitnormals_clear()
+
         mesh.use_auto_smooth = True
         mesh.auto_smooth_angle = math.radians(user_angle)
         bpy.ops.object.shade_smooth()
@@ -181,9 +184,14 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
         row.operator("retico.mesh_transfer_names", text="Transfer names")
 
         # overwrite autosmooth
-        row = box.row(align=True)
+        subbox = box.box()
+        row = subbox.row(align=True)
         row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
-        row.prop(context.scene, "retico_autosmooth_angle", text="", slider=True)
+        row.prop(context.scene, "retico_mesh_autosmooth_angle",
+                 text="", slider=True)
+        row = subbox.row()
+        row.prop(context.scene, "retico_mesh_autosmooth_del_customs",
+                 text="Delete custom normals")
 
         # copy names to clipboard
         row = box.row()
@@ -245,7 +253,7 @@ class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
         return len(context.view_layer.objects) > 0
 
     def execute(self, context):
-        set_autosmooth(context.scene.retico_autosmooth_angle)
+        set_autosmooth(context.scene.retico_mesh_autosmooth_angle)
         self.report({'INFO'}, "---[ Autosmooth ]---")
         return {'FINISHED'}
 
@@ -293,12 +301,17 @@ def register():
         description="Reports applies on selection, or not",
         default=False
     )
-    Scene.retico_autosmooth_angle = FloatProperty(
+    Scene.retico_mesh_autosmooth_angle = FloatProperty(
         name="autosmooth angle",
         description="autosmooth angle",
         default=85.0,
         min=0.0,
         max=180.0,
+    )
+    Scene.retico_mesh_autosmooth_del_customs = BoolProperty(
+        name="Delete custom normals if exists",
+        description="Delete custom normals if exists",
+        default=False
     )
 
 
@@ -307,9 +320,10 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
 
-    del Scene.retico_autosmooth_angle
+    del Scene.retico_mesh_autosmooth_angle
     del Scene.retico_mesh_reports_update_selection
     del Scene.retico_mesh_check_only_selected
+    del Scene.retico_mesh_autosmooth_del_customs
 
 
 if __name__ == "__main__":

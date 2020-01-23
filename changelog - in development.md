@@ -23,3 +23,4 @@ Usually in-dev version is usable... but bugs can appears of course.
 ### Meshes
 
 - new report: detect instanced meshes
+- autosmooth option to delete custom normals, or not
