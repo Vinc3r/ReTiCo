@@ -38,6 +38,33 @@ def set_backface_culling(toggle):
     return {'FINISHED'}
 
 
+def set_blendmode():
+    """ Set Blend mode to Alpha Blend if alpha is linked or set
+    """
+    # var init
+    selected_only = bpy.context.scene.retico_material_check_only_selected
+    objects_selected = selection_sets.meshes_with_materials(selected_only)
+
+    # function core
+    for obj in objects_selected:
+        for mat in obj.data.materials:
+            if mat is not None and mat.use_nodes:
+                for node in mat.node_tree.nodes:
+                    if node.type == 'BSDF_TRANSPARENT':
+                        mat.blend_method = 'BLEND'
+                        continue
+                    if node.type == 'BSDF_PRINCIPLED':
+                        for inp in node.inputs:
+                            if inp.identifier != 'Alpha':
+                                continue
+                            if inp.default_value == 1.0 and not inp.is_linked:
+                                mat.blend_method = 'OPAQUE'
+                            if inp.default_value < 1 or inp.is_linked:
+                                mat.blend_method = 'BLEND'
+
+    return {'FINISHED'}
+
+
 def set_active_texture(type="albedo"):
     """ Set a specific texture node to active,
         useful when viewport is shade as Solid -> Texture
@@ -461,6 +488,10 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row.operator("retico.material_backface", text="On").toogle = True
         row.operator("retico.material_backface", text="Off").toogle = False
 
+        # blend mode
+        row = box.row(align=True)
+        row.operator("retico.material_blendmode", text="Blend Mode")
+
         # transfer name
         row = box.row(align=True)
         row.operator("retico.material_transfer_names", text="Name from Object")
@@ -561,6 +592,16 @@ class RETICO_OT_material_backface(bpy.types.Operator):
 
     def execute(self, context):
         set_backface_culling(self.toogle)
+        return {'FINISHED'}
+
+
+class RETICO_OT_material_blendmode(bpy.types.Operator):
+    bl_idname = "retico.material_blendmode"
+    bl_label = "Set Blend mode according to alpha values"
+    bl_description = "Set Blend mode according to alpha values"
+
+    def execute(self, context):
+        set_blendmode()
         return {'FINISHED'}
 
 
@@ -698,6 +739,7 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
 classes = (
     RETICO_PT_material_panel,
     RETICO_OT_material_backface,
+    RETICO_OT_material_blendmode,
     RETICO_OT_material_transfer_names,
     RETICO_OT_material_gltf_mute,
     RETICO_OT_material_active_texture,
