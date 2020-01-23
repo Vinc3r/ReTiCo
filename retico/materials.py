@@ -11,13 +11,26 @@ from bpy.props import (
 )
 
 
-def set_backface_culling(mode):
+def set_backface_culling(toggle):
     selected_only = bpy.context.scene.retico_material_check_only_selected
     objects_selected = selection_sets.meshes_with_materials(selected_only)
+
+    # materials
     for obj in objects_selected:
         for mat in obj.data.materials:
             if mat is not None:
-                mat.use_backface_culling = mode
+                mat.use_backface_culling = toggle
+
+    # viewports
+    for area in bpy.context.screen.areas:
+        if area.type != 'VIEW_3D':
+            continue
+        for space in area.spaces:
+            if space.type != 'VIEW_3D':
+                continue
+            if space.shading.type == 'SOLID':
+                space.shading.show_backface_culling = toggle
+
     return {'FINISHED'}
 
 
@@ -59,6 +72,7 @@ def set_active_texture(type="albedo"):
     # update viewport
     bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
 
+    # viewport shading
     if bpy.context.scene.retico_material_activeTex_viewShading_solid:
         for area in bpy.context.screen.areas:
             if area.type != 'VIEW_3D':
