@@ -12,6 +12,7 @@ Usually in-dev version is usable... but bugs can appears of course.
 - new: Ability to operate only on selected objects, or not
 - new: reports can be sent to clipboard
 - UI cleaning
+- doc' is now on [Github wiki](https://github.com/Vinc3r/ReTiCo/wiki)
 
 ### Materials
 
