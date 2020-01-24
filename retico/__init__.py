@@ -3,7 +3,7 @@ bl_info = {
     "description": "RealTime Companion, a 3D realtime workflow addon oriented.",
     "author": "Vincent (V!nc3r) Lamy, CStfan",
     "category": "3D View",
-    "wiki_url": 'https://github.com/Vinc3r/ReTiCo/wiki/Documentation',
+    "wiki_url": 'https://github.com/Vinc3r/ReTiCo/wiki#retico',
     "tracker_url": 'https://github.com/Vinc3r/ReTiCo/issues',
     "version": (2020, 1, 24),
     "blender": (2, 81, 0)
