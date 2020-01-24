@@ -677,15 +677,17 @@ class RETICO_OT_material_report_none(bpy.types.Operator):
             self.report({'INFO'}, "All meshes have materials")
         else:
             to_clipboard = context.scene.retico_material_reports_to_clipboard
+            message_to_clipboard = ""
             if len(message_without_mtl) > 0:
                 if to_clipboard:
-                    context.window_manager.clipboard = message_without_mtl
+                    message_to_clipboard = message_without_mtl
                 self.report({'WARNING'}, message_without_mtl)
             if len(message_index) > 0:
                 if to_clipboard:
-                    context.window_manager.clipboard += "\r\n{}".format(
-                        message_index)
+                    message_to_clipboard += ("\r\n{}" + message_index)
                 self.report({'WARNING'}, message_index)
+            if to_clipboard:
+                context.window_manager.clipboard = message_to_clipboard
 
         return {'FINISHED'}
 

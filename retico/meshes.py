@@ -278,12 +278,12 @@ class RETICO_OT_mesh_report_instances(bpy.types.Operator):
             self.report({'INFO'}, "No instances detected.")
         else:
             to_clipboard = context.scene.retico_mesh_reports_to_clipboard
-            if to_clipboard:
-                context.window_manager.clipboard = ""
+            message_to_clipboard = ""
             for report in message:
-                if to_clipboard:
-                    context.window_manager.clipboard += "\r\n{}".format(report)
+                message_to_clipboard += ("\r\n" + report)
                 self.report({'INFO'}, report)
+            if to_clipboard:
+                context.window_manager.clipboard = message_to_clipboard
         return {'FINISHED'}
 
 

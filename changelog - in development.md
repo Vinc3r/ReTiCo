@@ -4,13 +4,13 @@ Current changes in [source folder](https://github.com/Vinc3r/BlenderScripts/tree
 
 Usually in-dev version is usable... but bugs can appears of course.
 
-
+Sor releases changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wiki/Changelog).
 
 ### Misc
 
 - new: Reports can modify selection if needed [#55](https://github.com/Vinc3r/ReTiCo/issues/55)
 - new: Ability to operate only on selected objects, or not
-- new: reports can be sent to clipboard
+- new: reports can be sent to clipboard [#62](https://github.com/Vinc3r/ReTiCo/issues/62)
 - UI cleaning
 - doc' is now on [Github wiki](https://github.com/Vinc3r/ReTiCo/wiki)
 
