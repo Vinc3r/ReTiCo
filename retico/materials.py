@@ -551,10 +551,10 @@ class RETICO_PT_material_panel(bpy.types.Panel):
                      text="Unmute all").exclude = "unmute"
 
         # fixing
-        subbox = box.box()
-        row = subbox.row()
+        box = layout.box()
+        row = box.row()
         row.label(text="Fix:")
-        grid = subbox.grid_flow(
+        grid = box.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
 
         # colorspace
