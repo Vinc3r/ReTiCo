@@ -49,6 +49,9 @@ def activate_uv_channels(uv_chan=0):
         mesh = obj.data
         if len(mesh.uv_layers) == 0 or \
                 len(mesh.uv_layers) <= uv_chan:
+            continue
+            """
+            # commented for now, I now think that activating doesn't have to create uv channel if inexisting
             for index in range(uv_chan + 1):
                 # UV1 creation
                 if index == 0 and len(mesh.uv_layers) == 0:
@@ -56,6 +59,7 @@ def activate_uv_channels(uv_chan=0):
                 # others UV, slipping existing
                 elif len(mesh.uv_layers) < (index + 1):
                     mesh.uv_layers.new(name="UV{}".format(uv_chan + 1))
+            """
 
         obj.data.uv_layers[uv_chan].active = True
 
@@ -68,7 +72,7 @@ def report_no_uv(channel=0):
     # var init
     objects_no_uv = []
     obj_no_uv_names: str = ""
-    message_suffix = "no UV on:"
+    message_suffix = "no UV1 on:"
     is_all_good = False
     update_selection = bpy.context.scene.retico_uvs_report_update_selection
     selected_only = bpy.context.scene.retico_uvs_check_only_selected
@@ -284,7 +288,7 @@ class RETICO_OT_uv_activate_channel(bpy.types.Operator):
         self.report(
             {'INFO'}, "---[ UV{} activated ]---".format(self.channel + 1))
         if not is_all_good:
-            self.report({'WARNING'}, "{}... Now fixed!".format(message))
+            self.report({'WARNING'}, message)
         activate_uv_channels(self.channel)
 
         return {'FINISHED'}
@@ -303,7 +307,6 @@ class RETICO_OT_uv_box_mapping(bpy.types.Operator):
         message, is_all_good = report_no_uv(0)
         self.report({'INFO'}, "---[ Box mapping ]---")
         if not is_all_good:
-            message = "{}... Now fixed!".format(message)
             self.report({'WARNING'}, message)
         box_mapping(context.scene.retico_box_mapping_size)
 

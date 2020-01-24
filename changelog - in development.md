@@ -29,3 +29,7 @@ Sor releases changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 
 - new:  report to detect instanced meshes
 - autosmooth option to delete custom normals, or not
+
+### UVs
+
+- Active uv1/2 not anymore create uv chan if missing (this wasn't user friendly)
