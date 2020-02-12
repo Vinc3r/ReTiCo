@@ -4,7 +4,7 @@ Current changes in [source folder](https://github.com/Vinc3r/BlenderScripts/tree
 
 Usually in-dev version is usable... but bugs can appears of course.
 
-Sor releases changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wiki/Changelog).
+For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wiki/Changelog).
 
 ### Meshes
 
