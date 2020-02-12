@@ -63,12 +63,11 @@ def transfer_names():
 
 
 def set_autosmooth(user_angle=85):
-    """ Activate autosmooth and delete custom normals if asked
+    """ Activate autosmooth
     """
     # var init
     user_active = bpy.context.view_layer.objects.active
     is_user_in_edit_mode = False
-    delete_customs = bpy.context.scene.retico_mesh_autosmooth_del_customs
     selected_only = bpy.context.scene.retico_mesh_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
@@ -83,13 +82,41 @@ def set_autosmooth(user_angle=85):
         bpy.context.view_layer.objects.active = obj
         mesh = obj.data
 
-        # custom normals
-        if delete_customs and mesh.has_custom_normals:
-            bpy.ops.mesh.customdata_custom_splitnormals_clear()
-
         mesh.use_auto_smooth = True
         mesh.auto_smooth_angle = math.radians(user_angle)
         bpy.ops.object.shade_smooth()
+
+    # handling active object
+    bpy.context.view_layer.objects.active = user_active
+    if is_user_in_edit_mode:
+        bpy.ops.object.mode_set(mode='EDIT')
+
+    return {'FINISHED'}
+
+def set_custom_normals(apply=True):
+    """ Add or delete custom normals if asked
+    """
+    # var init
+    user_active = bpy.context.view_layer.objects.active
+    is_user_in_edit_mode = False
+    selected_only = bpy.context.scene.retico_mesh_check_only_selected
+    objects_selected = selection_sets.meshes_in_selection(
+    ) if selected_only else selection_sets.meshes_selectable()
+
+    # handling active object
+    if bpy.context.view_layer.objects.active.mode == 'EDIT':
+        is_user_in_edit_mode = True
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+    # function core
+    for obj in objects_selected:
+        bpy.context.view_layer.objects.active = obj
+        mesh = obj.data
+
+        if apply:
+            bpy.ops.mesh.customdata_custom_splitnormals_add()
+        else:
+            bpy.ops.mesh.customdata_custom_splitnormals_clear()
 
     # handling active object
     bpy.context.view_layer.objects.active = user_active
@@ -191,9 +218,10 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
         row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
         row.prop(context.scene, "retico_mesh_autosmooth_angle",
                  text="", slider=True)
-        row = subbox.row()
-        row.prop(context.scene, "retico_mesh_autosmooth_del_customs",
-                 text="Delete custom normals")
+        row = subbox.row(align=True)
+        row.label(text="Custom Normals:")
+        row.operator("retico.mesh_set_custom_normals", text="Del").apply = False
+        row.operator("retico.mesh_set_custom_normals", text="Add").apply = True
 
         # copy names to clipboard
         row = box.row()
@@ -249,8 +277,8 @@ class RETICO_OT_mesh_transfer_names(bpy.types.Operator):
 
 class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
     bl_idname = "retico.mesh_set_autosmooth"
-    bl_label = "Set autosmooth to 85° and delete custom normals"
-    bl_description = "Set autosmooth to 85° and delete custom normals"
+    bl_label = "Batch set autosmooth"
+    bl_description = "Batch set autosmooth"
 
     @classmethod
     def poll(cls, context):
@@ -259,6 +287,21 @@ class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
     def execute(self, context):
         set_autosmooth(context.scene.retico_mesh_autosmooth_angle)
         self.report({'INFO'}, "---[ Autosmooth ]---")
+        return {'FINISHED'}
+
+class RETICO_OT_mesh_set_custom_normals(bpy.types.Operator):
+    bl_idname = "retico.mesh_set_custom_normals"
+    bl_label = "Add or delete custom split normals"
+    bl_description = "Add or delete custom split normals"
+    apply: BoolProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.view_layer.objects) > 0
+
+    def execute(self, context):
+        set_custom_normals(self.apply)
+        self.report({'INFO'}, "---[ Custom Normals ]---")
         return {'FINISHED'}
 
 
@@ -291,6 +334,7 @@ classes = (
     RETICO_PT_mesh_panel,
     RETICO_OT_mesh_transfer_names,
     RETICO_OT_mesh_set_autosmooth,
+    RETICO_OT_mesh_set_custom_normals,
     RETICO_OT_mesh_name_to_clipboard,
     RETICO_OT_mesh_report_instances,
 )
@@ -322,11 +366,6 @@ def register():
         min=0.0,
         max=180.0,
     )
-    Scene.retico_mesh_autosmooth_del_customs = BoolProperty(
-        name="Delete custom normals if exists",
-        description="Delete custom normals if exists",
-        default=False
-    )
 
 
 def unregister():
@@ -338,7 +377,6 @@ def unregister():
     del Scene.retico_mesh_reports_update_selection
     del Scene.retico_mesh_reports_to_clipboard
     del Scene.retico_mesh_check_only_selected
-    del Scene.retico_mesh_autosmooth_del_customs
 
 
 if __name__ == "__main__":
