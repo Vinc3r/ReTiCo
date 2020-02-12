@@ -7,7 +7,7 @@ Usually in-dev version is usable... but bugs can appears of course.
 For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wiki/Changelog).
 
 ---
-## Doc' needed:
+## Doc' modification needs:
 * [ ] custom normals change, below autosmooth
 ---
 
