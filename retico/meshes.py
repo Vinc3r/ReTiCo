@@ -220,8 +220,8 @@ class RETICO_PT_mesh_panel(bpy.types.Panel):
                  text="", slider=True)
         row = subbox.row(align=True)
         row.label(text="Custom Normals:")
-        row.operator("retico.mesh_set_custom_normals", text="Del").apply = False
         row.operator("retico.mesh_set_custom_normals", text="Add").apply = True
+        row.operator("retico.mesh_set_custom_normals", text="Del").apply = False
 
         # copy names to clipboard
         row = box.row()
