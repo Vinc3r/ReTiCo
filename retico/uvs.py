@@ -25,8 +25,17 @@ def rename_uv_channels():
     # function core
     for obj in objects_selected:
         mesh = obj.data
+        # no uv
         if len(mesh.uv_layers) < 0:
             continue
+        # only one uv chan
+        if len(mesh.uv_layers) == 1:
+            mesh.uv_layers[0].name = "UVMap"
+            continue
+        # if many chans, to avoid naming issue we have to use a tmp name first
+        for uv_chan in range(len(mesh.uv_layers)):
+            mesh.uv_layers[uv_chan].name = "tempName"
+        # now we can use a clean naming
         for uv_chan in range(len(mesh.uv_layers)):
             if uv_chan == 0:
                 mesh.uv_layers[0].name = "UVMap"
