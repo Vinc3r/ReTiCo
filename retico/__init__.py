@@ -5,7 +5,7 @@ bl_info = {
     "category": "3D View",
     "wiki_url": 'https://github.com/Vinc3r/ReTiCo/wiki#retico',
     "tracker_url": 'https://github.com/Vinc3r/ReTiCo/issues',
-    "version": (2020, 2, 12),
+    "version": (2020, 9, 21),
     "blender": (2, 81, 0)
 }
 

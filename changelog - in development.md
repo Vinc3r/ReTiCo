@@ -14,3 +14,4 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 ### Meshes
 
 - Custom Normals can now be batch deleted or added (below autosmooth function)
+- [Fix](https://github.com/Vinc3r/ReTiCo/issues/72): avoid UV naming issue
