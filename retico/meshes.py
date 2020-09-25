@@ -193,9 +193,9 @@ def report_instances():
         return report_message
 
 
-class RETICO_PT_mesh_panel(bpy.types.Panel):
+class RETICO_PT_mesh(bpy.types.Panel):
     bl_label = "Meshes"
-    bl_idname = "RETICO_PT_mesh_panel"
+    bl_idname = "RETICO_PT_mesh"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "ReTiCo"
@@ -331,7 +331,7 @@ class RETICO_OT_mesh_report_instances(bpy.types.Operator):
 
 
 classes = (
-    RETICO_PT_mesh_panel,
+    RETICO_PT_mesh,
     RETICO_OT_mesh_transfer_names,
     RETICO_OT_mesh_set_autosmooth,
     RETICO_OT_mesh_set_custom_normals,

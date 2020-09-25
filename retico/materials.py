@@ -10,6 +10,11 @@ from bpy.props import (
     StringProperty
 )
 
+"""
+**********************************************************************
+*                            def section                             *
+**********************************************************************
+"""
 
 def set_backface_culling(toggle):
     """ Toggle backface culling mode,
@@ -463,13 +468,20 @@ def report_several_users():
 
     return message_several_users, is_all_good
 
+"""
+**********************************************************************
+*                           class section                            *
+**********************************************************************
+"""
 
-class RETICO_PT_material_panel(bpy.types.Panel):
-    bl_idname = "RETICO_PT_material_panel"
-    bl_label = "Materials"
+class RETICO_PT_3dviewPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "ReTiCo"
+
+class RETICO_PT_material(RETICO_PT_3dviewPanel):
+    bl_idname = "RETICO_PT_material"
+    bl_label = "Materials"
 
     def draw(self, context):
         layout = self.layout
@@ -582,8 +594,18 @@ class RETICO_PT_material_panel(bpy.types.Panel):
         row.operator("retico.material_report_several", text="1+ Mat")
         row = grid.row(align=True)
         row.operator("retico.material_report_users", text="Shared")
+"""
+class RETICO_PT_material_misc(bpy.types.Panel):
+    bl_idname = "RETICO_PT_material_subpanel"
+    bl_label = "Materials Sub"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "ReTiCo"
+    bl_parent_id = "RETICO_PT_material"
 
-
+    def draw(self, context):
+        self.layout.row().label(text="Child panel")
+"""
 class RETICO_OT_material_backface(bpy.types.Operator):
     bl_idname = "retico.material_backface"
     bl_label = "Turn backFaceCulling on/off"
@@ -739,7 +761,8 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
 
 
 classes = (
-    RETICO_PT_material_panel,
+    RETICO_PT_material,
+    #RETICO_PT_material_misc,
     RETICO_OT_material_backface,
     RETICO_OT_material_blendmode,
     RETICO_OT_material_transfer_names,

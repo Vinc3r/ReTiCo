@@ -236,9 +236,9 @@ def mesh_box_mapping(mesh, size=1.0, only_selected=False):
     return {'FINISHED'}
 
 
-class RETICO_PT_uv_panel(bpy.types.Panel):
+class RETICO_PT_uv(bpy.types.Panel):
     bl_label = "UVs"
-    bl_idname = "RETICO_PT_uv_panel"
+    bl_idname = "RETICO_PT_uv"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "ReTiCo"
@@ -362,7 +362,7 @@ class RETICO_OT_uv_report_none(bpy.types.Operator):
 
 
 classes = (
-    RETICO_PT_uv_panel,
+    RETICO_PT_uv,
     RETICO_OT_uv_activate_channel,
     RETICO_OT_uv_box_mapping,
     RETICO_OT_uv_rename_channel,
