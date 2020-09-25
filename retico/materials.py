@@ -470,7 +470,7 @@ def report_several_users():
 
 """
 **********************************************************************
-*                           class section                            *
+* Panel class section                                                *
 **********************************************************************
 """
 
@@ -491,31 +491,40 @@ class RETICO_PT_material(RETICO_PT_3dviewPanel):
         row.prop(context.scene, "retico_material_check_only_selected",
                  text="only selected")
 
-        # misc
-        box = layout.box()
-        row = box.row(align=True)
+class RETICO_PT_material_misc(RETICO_PT_3dviewPanel):
+    bl_parent_id = "RETICO_PT_material"
+    bl_idname = "RETICO_PT_material_misc"
+    bl_label = "Misc"
+
+    def draw(self, context):
+        layout = self.layout
 
         # backface culling
+        row = layout.row(align=True)
         row.label(text="BackFace:")
         row.operator("retico.material_backface", text="On").toogle = True
         row.operator("retico.material_backface", text="Off").toogle = False
 
         # blend mode
-        row = box.row(align=True)
+        row = layout.row(align=True)
         row.operator("retico.material_blendmode", text="Blend Mode")
 
         # transfer name
-        row = box.row(align=True)
+        row = layout.row(align=True)
         row.operator("retico.material_transfer_names", text="Name from Object")
 
-        # active texture node
-        subbox = box.box()
-        row = subbox.row(align=True)
-        row.label(text="Active texture node:")
-        row = subbox.row()
+class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
+    bl_parent_id = "RETICO_PT_material"
+    bl_idname = "RETICO_PT_material_texnode"
+    bl_label = "Textures nodes"
+
+    def draw(self, context):
+        layout = self.layout
+
+        row = layout.row(align=True)
         row.prop(context.scene, "retico_material_activeTex_viewShading_solid",
                  text="set viewport shading")
-        grid = subbox.grid_flow(
+        grid = layout.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_active_texture",
@@ -530,16 +539,19 @@ class RETICO_PT_material(RETICO_PT_3dviewPanel):
         row.operator("retico.material_active_texture",
                      text="Emissive").texture_type = "emit"
 
-        # glTF workflow
+class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
+    bl_parent_id = "RETICO_PT_material"
+    bl_idname = "RETICO_PT_material_gltf"
+    bl_label = "glTF workflow"
+
+    def draw(self, context):
+        layout = self.layout
+        
+        # muting textures
         box = layout.box()
         row = box.row()
-        row.label(text="glTF workflow:")
-
-        # muting textures
-        subbox = box.box()
-        row = subbox.row()
         row.label(text="Mute textures except:")
-        grid = subbox.grid_flow(
+        grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
@@ -553,7 +565,7 @@ class RETICO_PT_material(RETICO_PT_3dviewPanel):
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
                      text="Emissive").exclude = "emit"
-        grid = subbox.grid_flow(
+        grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
@@ -562,11 +574,15 @@ class RETICO_PT_material(RETICO_PT_3dviewPanel):
         row.operator("retico.material_gltf_mute",
                      text="Unmute all").exclude = "unmute"
 
-        # fixing
-        box = layout.box()
-        row = box.row()
-        row.label(text="Fix:")
-        grid = box.grid_flow(
+class RETICO_PT_material_fix(RETICO_PT_3dviewPanel):
+    bl_parent_id = "RETICO_PT_material"
+    bl_idname = "RETICO_PT_material_fix"
+    bl_label = "Fix"
+
+    def draw(self, context):
+        layout = self.layout
+        
+        grid = layout.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
 
         # colorspace
@@ -577,16 +593,21 @@ class RETICO_PT_material(RETICO_PT_3dviewPanel):
         row = grid.row(align=True)
         row.operator("retico.material_gltf_uvnode_naming", text="UV links")
 
-        # report
-        box = layout.box()
-        row = box.row()
-        row.label(text="Report:")
-        row = box.row()
+
+class RETICO_PT_material_report(RETICO_PT_3dviewPanel):
+    bl_parent_id = "RETICO_PT_material"
+    bl_idname = "RETICO_PT_material_report"
+    bl_label = "Report"
+
+    def draw(self, context):
+        layout = self.layout
+
+        row = layout.row()
         row.prop(context.scene, "retico_material_reports_update_selection",
                  text="update selection")
         row.prop(context.scene, "retico_material_reports_to_clipboard",
                  text="to clipboard")
-        grid = box.grid_flow(
+        grid = layout.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_report_none", text="no Mat")
@@ -594,18 +615,13 @@ class RETICO_PT_material(RETICO_PT_3dviewPanel):
         row.operator("retico.material_report_several", text="1+ Mat")
         row = grid.row(align=True)
         row.operator("retico.material_report_users", text="Shared")
-"""
-class RETICO_PT_material_misc(bpy.types.Panel):
-    bl_idname = "RETICO_PT_material_subpanel"
-    bl_label = "Materials Sub"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "ReTiCo"
-    bl_parent_id = "RETICO_PT_material"
 
-    def draw(self, context):
-        self.layout.row().label(text="Child panel")
 """
+**********************************************************************
+* Operator class section                                             *
+**********************************************************************
+"""
+
 class RETICO_OT_material_backface(bpy.types.Operator):
     bl_idname = "retico.material_backface"
     bl_label = "Turn backFaceCulling on/off"
@@ -759,10 +775,19 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
 
         return {'FINISHED'}
 
+"""
+**********************************************************************
+* Registration                                                       *
+**********************************************************************
+"""
 
 classes = (
     RETICO_PT_material,
-    #RETICO_PT_material_misc,
+    RETICO_PT_material_misc,
+    RETICO_PT_material_texnode,
+    RETICO_PT_material_gltf,
+    RETICO_PT_material_fix,
+    RETICO_PT_material_report,
     RETICO_OT_material_backface,
     RETICO_OT_material_blendmode,
     RETICO_OT_material_transfer_names,
