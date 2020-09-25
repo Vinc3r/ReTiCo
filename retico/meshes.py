@@ -205,7 +205,7 @@ class RETICO_PT_mesh(bpy.types.Panel):
         box = layout.box()
         row = box.row()
         row.prop(context.scene, "retico_mesh_check_only_selected",
-                 text="only selected")
+                 text="only on selection")
 
         box = layout.box()
         # transfer object name to mesh name

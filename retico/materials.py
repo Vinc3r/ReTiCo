@@ -9,12 +9,26 @@ from bpy.props import (
     IntProperty,
     StringProperty
 )
+"""
+**********************************************************************
+*                            local variables                         *
+**********************************************************************
+"""
+
+gltf_active_texnodes = {
+    "albedo": True,
+    "orm": True,
+    "normal": True,
+    "emit": True
+}
+
 
 """
 **********************************************************************
 *                            def section                             *
 **********************************************************************
 """
+
 
 def set_backface_culling(toggle):
     """ Toggle backface culling mode,
@@ -179,9 +193,11 @@ def gltf_fix_colorspace():
                             continue
                         for link in out.links:
                             # only albedo and emit are sRGB
-                            if (link.to_node.type == 'BSDF_PRINCIPLED' and
-                                    link.to_socket.name == 'Base Color') or \
-                                    link.to_node.type == 'EMISSION':
+                            if (
+                                (link.to_node.type == 'BSDF_PRINCIPLED'
+                                    and link.to_socket.name == 'Base Color')
+                                or link.to_node.type == 'EMISSION'
+                            ):
                                 node.image.colorspace_settings.name = 'sRGB'
                             else:
                                 node.image.colorspace_settings.name = 'Non-Color'
@@ -263,17 +279,20 @@ def gltf_fix_uvnode_naming(operator):
 def gltf_mute_textures(exclude="albedo"):
     """ Help for texture baking operations by disabling some material infos
     """
+
     # var ini
     selected_only = bpy.context.scene.retico_material_check_only_selected
-    # no_muting_condition = [node.type, node.outputs.type, node.outputs.links.to_node.type], default: albedo
-    no_muting_condition = ['TEX_IMAGE', 'RGBA', 'BSDF_PRINCIPLED']
+    # muting_condition = [node.type, node.outputs.type, node.outputs.links.to_node.type], default: albedo
+    muting_condition = 'BSDF_PRINCIPLED'
     if exclude == "orm":
-        no_muting_condition = ['TEX_IMAGE', 'RGBA', 'SEPRGB']
+        muting_condition = 'SEPRGB'
     elif exclude == "normal":
-        no_muting_condition = ['TEX_IMAGE', 'RGBA', 'NORMAL_MAP']
+        muting_condition = 'NORMAL_MAP'
     elif exclude == "emit":
-        no_muting_condition = ['TEX_IMAGE', 'RGBA', 'EMISSION']
+        muting_condition = 'EMISSION'
     objects_selected = selection_sets.meshes_with_materials(selected_only)
+    if exclude.find("mute") == -1:
+        gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
 
     # function core
     for obj in objects_selected:
@@ -281,56 +300,45 @@ def gltf_mute_textures(exclude="albedo"):
         for mat in mesh.materials:
             if mat.use_nodes:
                 for node in mat.node_tree.nodes:
-                    emit_nodes = False
-                    if node.type == 'EMISSION':
-                        emit_nodes = True
-                    if node.type == 'ADD_SHADER' and node.inputs:
-                        for inp in node.inputs:
-                            if emit_nodes:
-                                # no need to go further if True
-                                continue
-                            if inp.links:
-                                for link in inp.links:
-                                    if link.from_node.type == 'EMISSION':
-                                        emit_nodes = True
-                                        continue
-                    if node.type != no_muting_condition[0] and not emit_nodes:
-                        # node have to pass first tests
+
+                    if node.type == 'OUTPUT_MATERIAL' or node.type == 'ADD_SHADER':
+                        # skip if not concern
                         continue
+
                     if exclude == "unmute":
-                        # in case we jsut want unmuting, no need to go further
+                        # in case we just want to unmute, no need to go further
                         node.mute = False
+                        for textype in gltf_active_texnodes:
+                            gltf_active_texnodes[textype] = True
                         continue
-                    # muting by default, then unmute exception
-                    node.mute = True
-                    if node.type == 'ADD_SHADER':
-                        # emit exception when muting all
-                        node.mute = False
-                    if exclude != "mute":
-                        for out in node.outputs:
-                            if out.type != no_muting_condition[1] and not emit_nodes:
-                                # output have to pass test
-                                continue
-                            if emit_nodes and exclude == "emit":
-                                if node.type == 'ADD_SHADER':
-                                    node.mute = True
+
+                    if exclude == "mute" and node.type.find("BSDF") == -1:
+                        # even when muting, we still want our basic nodes (BSDF) to be active
+                        node.mute = True
+                        for textype in gltf_active_texnodes:
+                            gltf_active_texnodes[textype] = False
+                        continue
+
+                    for out in node.outputs:
+                        if (
+                            exclude == "albedo"
+                            and node.type == 'TEX_IMAGE'
+                            and out.name == 'Color'
+                        ):
+                            gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
+                            node.mute = gltf_active_texnodes[exclude]
+                        elif exclude == "emit" and node.type == 'EMISSION':
+                            gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
+                            node.mute = gltf_active_texnodes[exclude]
+                        """
+                        else:
+                            for link in out.links:
+                                if link.to_node.type != muting_condition:
+                                    # detecting only our current target
                                     continue
-                                elif node.type == 'EMISSION':
-                                    node.mute = False
-                                    continue
-                            else:
-                                if node.type == 'ADD_SHADER':
-                                    node.mute = False
-                                    continue
-                                elif node.type == 'EMISSION':
-                                    node.mute = True
-                                    continue
-                                for link in out.links:
-                                    if link.to_node.type != no_muting_condition[2]:
-                                        # link have to pass test
-                                        continue
-                                    # ok we're sure about this node, let's unmute
-                                    node.mute = False
+                                gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
+                                node.mute = gltf_active_texnodes[exclude]
+                        """
 
     return {'FINISHED'}
 
@@ -468,16 +476,19 @@ def report_several_users():
 
     return message_several_users, is_all_good
 
+
 """
 **********************************************************************
 * Panel class section                                                *
 **********************************************************************
 """
 
+
 class RETICO_PT_3dviewPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "ReTiCo"
+
 
 class RETICO_PT_material(RETICO_PT_3dviewPanel):
     bl_idname = "RETICO_PT_material"
@@ -489,7 +500,8 @@ class RETICO_PT_material(RETICO_PT_3dviewPanel):
         box = layout.box()
         row = box.row()
         row.prop(context.scene, "retico_material_check_only_selected",
-                 text="only selected")
+                 text="only on selection")
+
 
 class RETICO_PT_material_misc(RETICO_PT_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
@@ -512,6 +524,7 @@ class RETICO_PT_material_misc(RETICO_PT_3dviewPanel):
         # transfer name
         row = layout.row(align=True)
         row.operator("retico.material_transfer_names", text="Name from Object")
+
 
 class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
@@ -539,6 +552,7 @@ class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
         row.operator("retico.material_active_texture",
                      text="Emissive").texture_type = "emit"
 
+
 class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
     bl_idname = "RETICO_PT_material_gltf"
@@ -546,25 +560,27 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
 
     def draw(self, context):
         layout = self.layout
-        
+
         # muting textures
         box = layout.box()
         row = box.row()
-        row.label(text="Mute textures except:")
+        row.label(text="CURRENTLY BROKE, IN-DEV")
+        row = box.row()
+        row.label(text="Active textures nodes:")
         grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
-                     text="Albedo").exclude = "albedo"
+                     text="Albedo", depress=gltf_active_texnodes["albedo"]).exclude = "albedo"
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
-                     text="ORM").exclude = "orm"
+                     text="ORM", depress=gltf_active_texnodes["orm"]).exclude = "orm"
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
-                     text="Normal").exclude = "normal"
+                     text="Normal", depress=gltf_active_texnodes["normal"]).exclude = "normal"
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
-                     text="Emissive").exclude = "emit"
+                     text="Emissive", depress=gltf_active_texnodes["emit"]).exclude = "emit"
         grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
@@ -574,6 +590,7 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
         row.operator("retico.material_gltf_mute",
                      text="Unmute all").exclude = "unmute"
 
+
 class RETICO_PT_material_fix(RETICO_PT_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
     bl_idname = "RETICO_PT_material_fix"
@@ -581,7 +598,7 @@ class RETICO_PT_material_fix(RETICO_PT_3dviewPanel):
 
     def draw(self, context):
         layout = self.layout
-        
+
         grid = layout.grid_flow(
             row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
 
@@ -616,11 +633,13 @@ class RETICO_PT_material_report(RETICO_PT_3dviewPanel):
         row = grid.row(align=True)
         row.operator("retico.material_report_users", text="Shared")
 
+
 """
 **********************************************************************
 * Operator class section                                             *
 **********************************************************************
 """
+
 
 class RETICO_OT_material_backface(bpy.types.Operator):
     bl_idname = "retico.material_backface"
@@ -774,6 +793,7 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
                 self.report({'WARNING'}, message_several_users)
 
         return {'FINISHED'}
+
 
 """
 **********************************************************************

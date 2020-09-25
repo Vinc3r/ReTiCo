@@ -56,8 +56,10 @@ def activate_uv_channels(uv_chan=0):
     # function core
     for obj in objects_selected:
         mesh = obj.data
-        if len(mesh.uv_layers) == 0 or \
-                len(mesh.uv_layers) <= uv_chan:
+        if (
+            len(mesh.uv_layers) == 0 or
+            len(mesh.uv_layers) <= uv_chan
+        ):
             continue
             """
             # commented for now, I now think that activating doesn't have to create uv channel if inexisting
@@ -249,7 +251,7 @@ class RETICO_PT_uv(bpy.types.Panel):
         box = layout.box()
         row = box.row()
         row.prop(context.scene, "retico_uvs_check_only_selected",
-                 text="only selected")
+                 text="only on selection")
 
         box = layout.box()
         # activate
