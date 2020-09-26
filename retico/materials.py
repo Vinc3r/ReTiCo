@@ -321,15 +321,33 @@ def gltf_mute_textures(exclude="albedo"):
 
                     for out in node.outputs:
                         if (
-                            exclude == "albedo"
-                            and node.type == 'TEX_IMAGE'
-                            and out.name == 'Color'
+                            node.type == 'TEX_IMAGE'
+                            and out.is_linked
                         ):
+                            if (
+                                exclude == "albedo"
+                                and out.name == 'Color'
+                                and out.links[0].to_socket.name == 'Base Color'
+                            ):
+                                node.mute = gltf_active_texnodes[exclude]
+                            elif (
+                                exclude == "normal"
+                                and out.name == 'Color'
+                                and out.links[0].to_socket.name == 'Base Color'
+                                # TODO
+                            ):
+                                node.mute = gltf_active_texnodes[exclude]
+                            gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
+                        """
+                        # https://docs.blender.org/api/current/bpy.types.NodeLinks.html
+                         link = C.active_object.data.materials[0].node_tree.nodes[2].outputs['Color'].links[0]
+                         C.active_object.data.materials[0].node_tree.links.remove(link)
+                        """
+
+                        """elif exclude == "emit" and node.type == 'EMISSION':
                             gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
                             node.mute = gltf_active_texnodes[exclude]
-                        elif exclude == "emit" and node.type == 'EMISSION':
-                            gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
-                            node.mute = gltf_active_texnodes[exclude]
+                        """
                         """
                         else:
                             for link in out.links:
