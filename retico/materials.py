@@ -282,18 +282,9 @@ def gltf_mute_textures(exclude="albedo"):
 
     # var ini
     selected_only = bpy.context.scene.retico_material_check_only_selected
-    # muting_condition = [node.type, node.outputs.type, node.outputs.links.to_node.type], default: albedo
-    muting_condition = 'BSDF_PRINCIPLED'
-    if exclude == "orm":
-        muting_condition = 'SEPRGB'
-    elif exclude == "normal":
-        muting_condition = 'NORMAL_MAP'
-    elif exclude == "emit":
-        muting_condition = 'EMISSION'
+    is_texnode_detected = False
     objects_selected = selection_sets.meshes_with_materials(selected_only)
-    if exclude.find("mute") == -1:
-        gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
-
+    use_unlink = bpy.context.scene.retico_material_mute_using_unlink
     # function core
     for obj in objects_selected:
         mesh = obj.data
@@ -321,23 +312,63 @@ def gltf_mute_textures(exclude="albedo"):
 
                     for out in node.outputs:
                         if (
-                            node.type == 'TEX_IMAGE'
+                            (
+                                node.type == 'TEX_IMAGE'
+                                or node.type == 'NORMAL_MAP'
+                                or node.type == 'EMISSION'
+                                or node.type == 'SEPRGB'
+                            )
                             and out.is_linked
                         ):
                             if (
-                                exclude == "albedo"
-                                and out.name == 'Color'
-                                and out.links[0].to_socket.name == 'Base Color'
+                                # albedo nodes
+                                (
+                                    exclude == "albedo"
+                                    and out.links[0].to_node.type == 'BSDF_PRINCIPLED'
+                                    and out.links[0].to_socket.name == 'Base Color'
+                                )
+                                or
+                                # normal nodes
+                                (
+                                    exclude == "normal"
+                                    and
+                                    (
+                                        (
+                                            # texnode linked to normal map node
+                                            out.links[0].to_node.type == 'NORMAL_MAP'
+                                            # texnode linked to principled
+                                            or (
+                                                out.links[0].to_node.type == 'BSDF_PRINCIPLED'
+                                                and out.links[0].to_socket.name == 'Normal'
+                                            )
+                                        )
+                                        # normal map node
+                                        or node.type == 'NORMAL_MAP'
+                                    )
+                                )
+                                or
+                                # emissive nodes
+                                (
+                                    exclude == "emit"
+                                    and
+                                    (
+                                        out.links[0].to_node.type == 'EMISSION'
+                                        or node.type == 'EMISSION'
+                                    )
+                                )
+                                # orm nodes
+                                or
+                                (
+                                    exclude == "orm"
+                                    and
+                                    (
+                                        node.type == 'SEPRGB'
+                                        or out.links[0].to_node.type == 'SEPRGB'
+                                    )
+                                )
                             ):
                                 node.mute = gltf_active_texnodes[exclude]
-                            elif (
-                                exclude == "normal"
-                                and out.name == 'Color'
-                                and out.links[0].to_socket.name == 'Base Color'
-                                # TODO
-                            ):
-                                node.mute = gltf_active_texnodes[exclude]
-                            gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
+                                is_texnode_detected = True
                         """
                         # https://docs.blender.org/api/current/bpy.types.NodeLinks.html
                          link = C.active_object.data.materials[0].node_tree.nodes[2].outputs['Color'].links[0]
@@ -357,6 +388,9 @@ def gltf_mute_textures(exclude="albedo"):
                                 gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
                                 node.mute = gltf_active_texnodes[exclude]
                         """
+    if is_texnode_detected:
+        gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
+        is_texnode_detected = False
 
     return {'FINISHED'}
 
@@ -547,7 +581,7 @@ class RETICO_PT_material_misc(RETICO_PT_3dviewPanel):
 class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
     bl_idname = "RETICO_PT_material_texnode"
-    bl_label = "Textures nodes"
+    bl_label = "Active texture"
 
     def draw(self, context):
         layout = self.layout
@@ -592,13 +626,13 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
                      text="Albedo", depress=gltf_active_texnodes["albedo"]).exclude = "albedo"
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
-                     text="ORM", depress=gltf_active_texnodes["orm"]).exclude = "orm"
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_mute",
                      text="Normal", depress=gltf_active_texnodes["normal"]).exclude = "normal"
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
                      text="Emissive", depress=gltf_active_texnodes["emit"]).exclude = "emit"
+        row = grid.row(align=True)
+        row.operator("retico.material_gltf_mute",
+                     text="ORM", depress=gltf_active_texnodes["orm"]).exclude = "orm"
         grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
@@ -607,6 +641,9 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
                      text="Unmute all").exclude = "unmute"
+        row = box.row()
+        row.prop(context.scene, "retico_material_mute_using_unlink",
+                 text="unlink nodes")
 
 
 class RETICO_PT_material_fix(RETICO_PT_3dviewPanel):
@@ -863,6 +900,11 @@ def register():
         description="Set 3DView shading to Solid -> Texture",
         default=True
     )
+    Scene.retico_material_mute_using_unlink = BoolProperty(
+        name="Unlink nodes instead of muting them",
+        description="Unlink nodes instead of muting them",
+        default=False
+    )
 
 
 def unregister():
@@ -873,6 +915,7 @@ def unregister():
     del Scene.retico_material_reports_to_clipboard
     del Scene.retico_material_check_only_selected
     del Scene.retico_material_activeTex_viewShading_solid
+    del Scene.retico_material_mute_using_unlink
 
 
 if __name__ == "__main__":
