@@ -288,7 +288,6 @@ def gltf_mute_textures(exclude="albedo"):
     selected_only = bpy.context.scene.retico_material_check_only_selected
     is_texnode_detected = False
     objects_selected = selection_sets.meshes_with_materials(selected_only)
-    use_unlink = bpy.context.scene.retico_material_mute_using_unlink
     # function core
     for obj in objects_selected:
         mesh = obj.data
@@ -398,7 +397,7 @@ def gltf_mute_textures(exclude="albedo"):
                                             and node.node_tree.original == bpy.data.node_groups['glTF Settings']
                                         )][0]
                                         input = gltfSettings.inputs['Occlusion']
-                                        
+
                                     output = node.outputs[chan_name]
                                     mat.node_tree.links.new(
                                         input, output, verify_limits=True)
@@ -728,10 +727,6 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
             row = grid.row(align=True)
             row.operator("retico.material_gltf_mute",
                          text="Unmute all").exclude = "unmute"
-            # options
-            row = box.row()
-            row.prop(context.scene, "retico_material_mute_using_unlink",
-                     text="unlink nodes")
         else:
             row = layout.row(align=True)
             row.label(text="No object in selection.")
@@ -1015,11 +1010,6 @@ def register():
         description="Set 3DView shading to Solid -> Texture",
         default=True
     )
-    Scene.retico_material_mute_using_unlink = BoolProperty(
-        name="Unlink nodes instead of muting them",
-        description="Unlink nodes instead of muting them",
-        default=False
-    )
 
 
 def unregister():
@@ -1030,7 +1020,6 @@ def unregister():
     del Scene.retico_material_reports_to_clipboard
     del Scene.retico_material_check_only_selected
     del Scene.retico_material_activeTex_viewShading_solid
-    del Scene.retico_material_mute_using_unlink
 
 
 if __name__ == "__main__":
