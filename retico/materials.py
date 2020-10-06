@@ -365,14 +365,43 @@ def gltf_mute_textures(exclude="albedo"):
                                     )
                                 )
                             ):
+                                # for ORM, we need to reset some settings
+                                if exclude == "orm":
+                                    chan_target = ["R", "G", "B"]
+                                    for chan in chan_target:
+                                        input = mat.node_tree.nodes['Principled BSDF'].inputs['Roughness']
+                                        # occlusion specific
+                                        if chan == "R":
+                                            gltfSettings = [node for node in mat.node_tree.nodes if (
+                                                node.type == 'GROUP'
+                                                and node.node_tree.original == bpy.data.node_groups['glTF Settings']
+                                            )][0]
+                                            input = gltfSettings.inputs['Occlusion']
+                                        # metallic
+                                        elif chan == "B":
+                                            input = mat.node_tree.nodes['Principled BSDF'].inputs['Metallic']
+
+                                        sepRGB = [node for node in mat.node_tree.nodes if node.type == 'SEPRGB'][0]
+                                        output = sepRGB.outputs[chan]
+                                        if not sepRGB.outputs[chan].is_linked:
+                                            mat.node_tree.links.new(
+                                                input, output, verify_limits=True)
+
+                                    gltf_active_texnodes["orm_chans"] = False
+                                    gltf_active_texnodes["orm_chans_R"] = True
+                                    gltf_active_texnodes["orm_chans_G"] = True
+                                    gltf_active_texnodes["orm_chans_B"] = True
+
                                 node.mute = gltf_active_texnodes[exclude]
                                 is_texnode_detected = True
-
                             
                             elif (
                                 exclude.find("orm_chans_") != -1
                                 and node.type == 'SEPRGB'
                             ):
+
+                                gltf_active_texnodes["orm"] = False
+
                                 # occlusion (R) roughness (G) metallic (B)
                                 chan_name = exclude.split("orm_chans_")[1]
                                 # occlusion is handled in a different way
