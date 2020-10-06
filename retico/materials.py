@@ -303,7 +303,10 @@ def gltf_mute_textures(exclude="albedo"):
                         # in case we just want to unmute, no need to go further
                         node.mute = False
                         for textype in gltf_active_texnodes:
-                            gltf_active_texnodes[textype] = True
+                            if textype != "orm_chans":
+                                gltf_active_texnodes[textype] = True
+                            else:
+                                gltf_active_texnodes[textype] = False
                         continue
 
                     if exclude == "mute" and node.type.find("BSDF") == -1:
@@ -375,13 +378,16 @@ def gltf_mute_textures(exclude="albedo"):
                                             gltfSettings = [node for node in mat.node_tree.nodes if (
                                                 node.type == 'GROUP'
                                                 and node.node_tree.original == bpy.data.node_groups['glTF Settings']
-                                            )][0]
-                                            input = gltfSettings.inputs['Occlusion']
+                                            )]
+                                            if len(gltfSettings) > 0:
+                                                gltfSettings = gltfSettings[0]
+                                                input = gltfSettings.inputs['Occlusion']
                                         # metallic
                                         elif chan == "B":
                                             input = mat.node_tree.nodes['Principled BSDF'].inputs['Metallic']
 
-                                        sepRGB = [node for node in mat.node_tree.nodes if node.type == 'SEPRGB'][0]
+                                        sepRGB = [
+                                            node for node in mat.node_tree.nodes if node.type == 'SEPRGB'][0]
                                         output = sepRGB.outputs[chan]
                                         if not sepRGB.outputs[chan].is_linked:
                                             mat.node_tree.links.new(
@@ -394,7 +400,7 @@ def gltf_mute_textures(exclude="albedo"):
 
                                 node.mute = gltf_active_texnodes[exclude]
                                 is_texnode_detected = True
-                            
+
                             elif (
                                 exclude.find("orm_chans_") != -1
                                 and node.type == 'SEPRGB'
@@ -424,15 +430,19 @@ def gltf_mute_textures(exclude="albedo"):
                                         gltfSettings = [node for node in mat.node_tree.nodes if (
                                             node.type == 'GROUP'
                                             and node.node_tree.original == bpy.data.node_groups['glTF Settings']
-                                        )][0]
-                                        input = gltfSettings.inputs['Occlusion']
-
-                                    output = node.outputs[chan_name]
-                                    mat.node_tree.links.new(
-                                        input, output, verify_limits=True)
+                                        )]
+                                        if len(gltfSettings) > 0:
+                                            gltfSettings = gltfSettings[0]
+                                            input = gltfSettings.inputs['Occlusion']
+                                            output = node.outputs[chan_name]
+                                            mat.node_tree.links.new(
+                                                input, output, verify_limits=True)
+                                    else:
+                                        output = node.outputs[chan_name]
+                                        mat.node_tree.links.new(
+                                            input, output, verify_limits=True)
 
                                 is_texnode_detected = True
-                                
 
                         """
                         # https://docs.blender.org/api/current/bpy.types.NodeLinks.html
