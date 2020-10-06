@@ -19,9 +19,9 @@ gltf_active_texnodes = {
     "albedo": True,
     "orm": True,
     "orm_chans": False,
-    "orm_chans_r": True,
-    "orm_chans_g": True,
-    "orm_chans_b": True,
+    "orm_chans_R": True,
+    "orm_chans_G": True,
+    "orm_chans_B": True,
     "normal": True,
     "emit": True
 }
@@ -316,81 +316,99 @@ def gltf_mute_textures(exclude="albedo"):
 
                     for out in node.outputs:
                         if (
-                            (
-                                node.type == 'TEX_IMAGE'
-                                or node.type == 'NORMAL_MAP'
-                                or node.type == 'EMISSION'
-                                or node.type == 'SEPRGB'
-                            )
-                            and out.is_linked
+                            node.type == 'TEX_IMAGE'
+                            or node.type == 'NORMAL_MAP'
+                            or node.type == 'EMISSION'
+                            or node.type == 'SEPRGB'
                         ):
+
                             if (
-                                # albedo nodes
-                                (
-                                    exclude == "albedo"
-                                    and out.links[0].to_node.type == 'BSDF_PRINCIPLED'
-                                    and out.links[0].to_socket.name == 'Base Color'
-                                )
-                                or
-                                # normal nodes
-                                (
-                                    exclude == "normal"
-                                    and
+                                len(out.links) > 0
+                                and (
+                                    # albedo nodes
                                     (
-                                        (
-                                            # texnode linked to normal map node
-                                            out.links[0].to_node.type == 'NORMAL_MAP'
-                                            # texnode linked to principled
-                                            or (
-                                                out.links[0].to_node.type == 'BSDF_PRINCIPLED'
-                                                and out.links[0].to_socket.name == 'Normal'
+                                        exclude == "albedo"
+                                        and out.links[0].to_node.type == 'BSDF_PRINCIPLED'
+                                        and out.links[0].to_socket.name == 'Base Color'
+                                    )
+                                    # normal nodes
+                                    or (
+                                        exclude == "normal"
+                                        and (
+                                            (
+                                                # texnode linked to normal map node
+                                                out.links[0].to_node.type == 'NORMAL_MAP'
+                                                # texnode linked to principled
+                                                or (
+                                                    out.links[0].to_node.type == 'BSDF_PRINCIPLED'
+                                                    and out.links[0].to_socket.name == 'Normal'
+                                                )
                                             )
+                                            # normal map node
+                                            or node.type == 'NORMAL_MAP'
                                         )
-                                        # normal map node
-                                        or node.type == 'NORMAL_MAP'
                                     )
-                                )
-                                or
-                                # emissive nodes
-                                (
-                                    exclude == "emit"
-                                    and
-                                    (
-                                        out.links[0].to_node.type == 'EMISSION'
-                                        or node.type == 'EMISSION'
+                                    # emissive nodes
+                                    or (
+                                        exclude == "emit"
+                                        and (
+                                            out.links[0].to_node.type == 'EMISSION'
+                                            or node.type == 'EMISSION'
+                                        )
                                     )
-                                )
-                                # orm nodes
-                                or
-                                (
-                                    exclude == "orm"
-                                    and
-                                    (
-                                        node.type == 'SEPRGB'
-                                        or out.links[0].to_node.type == 'SEPRGB'
+                                    # orm nodes
+                                    or (
+                                        exclude == "orm"
+                                        and (
+                                            node.type == 'SEPRGB'
+                                            or out.links[0].to_node.type == 'SEPRGB'
+                                        )
                                     )
                                 )
                             ):
                                 node.mute = gltf_active_texnodes[exclude]
                                 is_texnode_detected = True
+
+                            
+                            elif (
+                                exclude.find("orm_chans_") != -1
+                                and node.type == 'SEPRGB'
+                            ):
+                                # occlusion (R) roughness (G) metallic (B)
+                                chan_name = exclude.split("orm_chans_")[1]
+                                # occlusion is handled in a different way
+                                chan_target = (
+                                    "Roughness" if chan_name == "G" else "Metallic")
+
+                                # unlink
+                                if (
+                                    gltf_active_texnodes["orm_chans_{}".format(
+                                        chan_name)]
+                                    and len(node.outputs[chan_name].links) > 0
+                                ):
+                                    link = node.outputs[chan_name].links[0]
+                                    mat.node_tree.links.remove(link)
+                                # link
+                                else:
+                                    input = mat.node_tree.nodes['Principled BSDF'].inputs[chan_target]
+                                    # occlusion specific
+                                    if chan_name == "R":
+                                        gltfSettings = (node for node in mat.node_tree.nodes if (
+                                            node.type == 'GROUP'
+                                            and node.node_tree.original == node.bpy.data.node_groups['glTF Settings']
+                                        ))
+                                        input = gltfSettings.inputs['Occlusion']
+                                    output = node.outputs[chan_name]
+                                    mat.node_tree.links.new(
+                                        input, output, verify_limits=True)
+
+                                is_texnode_detected = True
+                                
+
                         """
                         # https://docs.blender.org/api/current/bpy.types.NodeLinks.html
                          link = C.active_object.data.materials[0].node_tree.nodes[2].outputs['Color'].links[0]
                          C.active_object.data.materials[0].node_tree.links.remove(link)
-                        """
-
-                        """elif exclude == "emit" and node.type == 'EMISSION':
-                            gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
-                            node.mute = gltf_active_texnodes[exclude]
-                        """
-                        """
-                        else:
-                            for link in out.links:
-                                if link.to_node.type != muting_condition:
-                                    # detecting only our current target
-                                    continue
-                                gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
-                                node.mute = gltf_active_texnodes[exclude]
                         """
     if is_texnode_detected:
         gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
@@ -651,8 +669,6 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
             # muting textures
             box = layout.box()
             row = box.row()
-            row.label(text="CURRENTLY BROKE, IN-DEV")
-            row = box.row()
             row.label(text="Active textures nodes:")
             grid = box.grid_flow(
                 row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
@@ -682,11 +698,26 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
                 row = grid.row(align=True)
                 row.operator("retico.material_gltf_mute",
                              text="", emboss=False).exclude = ""
-                subgrid = grid.grid_flow(
-                    row_major=True, columns=1, even_columns=True, even_rows=True, align=True)
-                row = subgrid.row(align=True)
+                # occlusion
+                row = grid.row(align=True)
                 row.operator("retico.material_gltf_mute",
-                             text="Occlusion (R)", depress=gltf_active_texnodes["orm_chans_r"]).exclude = "orm_chans_r"
+                             text="Occlusion (R)", depress=gltf_active_texnodes["orm_chans_R"]).exclude = "orm_chans_R"
+                # empty operator needed to return to line
+                row = grid.row(align=True)
+                row.operator("retico.material_gltf_mute",
+                             text="", emboss=False).exclude = ""
+                # roughness
+                row = grid.row(align=True)
+                row.operator("retico.material_gltf_mute",
+                             text="Roughness (G)", depress=gltf_active_texnodes["orm_chans_G"]).exclude = "orm_chans_G"
+                # empty operator needed to return to line
+                row = grid.row(align=True)
+                row.operator("retico.material_gltf_mute",
+                             text="", emboss=False).exclude = ""
+                # metallic
+                row = grid.row(align=True)
+                row.operator("retico.material_gltf_mute",
+                             text="Metallic (B)", depress=gltf_active_texnodes["orm_chans_B"]).exclude = "orm_chans_B"
             # global mute/unmute
             grid = box.grid_flow(
                 row_major=True, even_columns=True, even_rows=True, align=True)
@@ -818,10 +849,10 @@ class RETICO_OT_material_gltf_mute(bpy.types.Operator):
     exclude: StringProperty()
 
     def execute(self, context):
-        if self.exclude != "" and self.exclude != "orm_chans":
-            gltf_mute_textures(self.exclude)
-        elif self.exclude == "orm_chans":
+        if self.exclude == "orm_chans":
             gltf_active_texnodes["orm_chans"] = not gltf_active_texnodes["orm_chans"]
+        if self.exclude != "":
+            gltf_mute_textures(self.exclude)
         return {'FINISHED'}
 
 
