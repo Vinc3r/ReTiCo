@@ -393,11 +393,12 @@ def gltf_mute_textures(exclude="albedo"):
                                     input = mat.node_tree.nodes['Principled BSDF'].inputs[chan_target]
                                     # occlusion specific
                                     if chan_name == "R":
-                                        gltfSettings = (node for node in mat.node_tree.nodes if (
+                                        gltfSettings = [node for node in mat.node_tree.nodes if (
                                             node.type == 'GROUP'
-                                            and node.node_tree.original == node.bpy.data.node_groups['glTF Settings']
-                                        ))
+                                            and node.node_tree.original == bpy.data.node_groups['glTF Settings']
+                                        )][0]
                                         input = gltfSettings.inputs['Occlusion']
+                                        
                                     output = node.outputs[chan_name]
                                     mat.node_tree.links.new(
                                         input, output, verify_limits=True)
