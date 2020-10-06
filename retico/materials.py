@@ -18,6 +18,10 @@ from bpy.props import (
 gltf_active_texnodes = {
     "albedo": True,
     "orm": True,
+    "orm_chans": False,
+    "orm_chans_r": True,
+    "orm_chans_g": True,
+    "orm_chans_b": True,
     "normal": True,
     "emit": True
 }
@@ -620,7 +624,7 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
         row = box.row()
         row.label(text="Active textures nodes:")
         grid = box.grid_flow(
-            row_major=True, even_columns=True, even_rows=True, align=True)
+            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
                      text="Albedo", depress=gltf_active_texnodes["albedo"]).exclude = "albedo"
@@ -629,10 +633,30 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
                      text="Normal", depress=gltf_active_texnodes["normal"]).exclude = "normal"
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
-                     text="Emissive", depress=gltf_active_texnodes["emit"]).exclude = "emit"
+                     text="ORM", depress=gltf_active_texnodes["orm"]).exclude = "orm"
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
-                     text="ORM", depress=gltf_active_texnodes["orm"]).exclude = "orm"
+                     text="Emissive", depress=gltf_active_texnodes["emit"]).exclude = "emit"
+        # ORM channels are not asked
+        if gltf_active_texnodes["orm_chans"] == False:
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         icon='TRIA_RIGHT', text="ORM chans", depress=gltf_active_texnodes["orm_chans"]).exclude = "orm_chans"
+        # ORM channels are asked
+        else:
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         icon='TRIA_DOWN', text="ORM chans", depress=gltf_active_texnodes["orm_chans"]).exclude = "orm_chans"
+            # empty operator needed to return to line
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         text="", emboss=False).exclude = ""
+            subgrid = grid.grid_flow(
+                row_major=True, columns=1, even_columns=True, even_rows=True, align=True)
+            row = subgrid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         text="Occlusion (R)", depress=gltf_active_texnodes["orm_chans_r"]).exclude = "orm_chans_r"
+        # global mute/unmute
         grid = box.grid_flow(
             row_major=True, even_columns=True, even_rows=True, align=True)
         row = grid.row(align=True)
@@ -641,6 +665,7 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
         row = grid.row(align=True)
         row.operator("retico.material_gltf_mute",
                      text="Unmute all").exclude = "unmute"
+        # options
         row = box.row()
         row.prop(context.scene, "retico_material_mute_using_unlink",
                  text="unlink nodes")
@@ -738,7 +763,10 @@ class RETICO_OT_material_gltf_mute(bpy.types.Operator):
     exclude: StringProperty()
 
     def execute(self, context):
-        gltf_mute_textures(self.exclude)
+        if self.exclude != "" and self.exclude != "orm_chans":
+            gltf_mute_textures(self.exclude)
+        elif self.exclude == "orm_chans":
+            gltf_active_texnodes["orm_chans"] = not gltf_active_texnodes["orm_chans"]
         return {'FINISHED'}
 
 

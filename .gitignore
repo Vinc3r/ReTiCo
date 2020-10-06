@@ -6,3 +6,4 @@ Thumbs.db
 *.ffs_db
 .directory
 *__pycache__*
+.vscode/*
