@@ -11,6 +11,15 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 * [ ] custom normals change, below autosmooth
 ---
 
+### General
+
+- detect if selection is empty while "only on selection" is active, and tell the user about the situation
+
+### Materials
+
+- glTF workflow: new way for muting textures
+- glTF workflow: allow to mute individual ORM channels (by unlinking outputs of SEPRGB node)
+
 ### Meshes
 
 - Custom Normals can now be batch deleted or added (below autosmooth function)
