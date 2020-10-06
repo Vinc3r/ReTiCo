@@ -253,35 +253,46 @@ class RETICO_PT_uv(bpy.types.Panel):
         row.prop(context.scene, "retico_uvs_check_only_selected",
                  text="only on selection")
 
-        box = layout.box()
-        # activate
-        row = box.row(align=True)
-        row.label(text="Active:")
-        row.operator("retico.uv_activate_channel", text="1").channel = 0
-        row.operator("retico.uv_activate_channel", text="2").channel = 1
-        # rename channels
-        row = box.row(align=True)
-        row.operator("retico.uv_rename_channel", text="Rename channels")
-        # box mapping
-        row = box.row(align=True)
-        row.operator("retico.uv_box_mapping", text="Box mapping")
-        row.prop(context.scene, "retico_box_mapping_size", text="")
+        if (
+            not bpy.context.scene.retico_uvs_check_only_selected
+            or (
+                bpy.context.scene.retico_uvs_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
 
-        # report
-        box = layout.box()
-        row = box.row(align=True)
-        row.label(text="Report:")
-        row = box.row()
-        row.prop(context.scene, "retico_uvs_report_update_selection",
-                 text="update selection")
-        row.prop(context.scene, "retico_uvs_reports_to_clipboard",
-                 text="to clipboard")
-        grid = box.grid_flow(
-            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
-        row = grid.row(align=True)
-        row.operator("retico.uv_report_none", text="no UV1").channel = 0
-        row = grid.row(align=True)
-        row.operator("retico.uv_report_none", text="no UV2").channel = 1
+            box = layout.box()
+            # activate
+            row = box.row(align=True)
+            row.label(text="Active:")
+            row.operator("retico.uv_activate_channel", text="1").channel = 0
+            row.operator("retico.uv_activate_channel", text="2").channel = 1
+            # rename channels
+            row = box.row(align=True)
+            row.operator("retico.uv_rename_channel", text="Rename channels")
+            # box mapping
+            row = box.row(align=True)
+            row.operator("retico.uv_box_mapping", text="Box mapping")
+            row.prop(context.scene, "retico_box_mapping_size", text="")
+
+            # report
+            box = layout.box()
+            row = box.row(align=True)
+            row.label(text="Report:")
+            row = box.row()
+            row.prop(context.scene, "retico_uvs_report_update_selection",
+                     text="update selection")
+            row.prop(context.scene, "retico_uvs_reports_to_clipboard",
+                     text="to clipboard")
+            grid = box.grid_flow(
+                row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+            row = grid.row(align=True)
+            row.operator("retico.uv_report_none", text="no UV1").channel = 0
+            row = grid.row(align=True)
+            row.operator("retico.uv_report_none", text="no UV2").channel = 1
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
 
 
 class RETICO_OT_uv_activate_channel(bpy.types.Operator):

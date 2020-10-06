@@ -93,6 +93,7 @@ def set_autosmooth(user_angle=85):
 
     return {'FINISHED'}
 
+
 def set_custom_normals(apply=True):
     """ Add or delete custom normals if asked
     """
@@ -202,45 +203,59 @@ class RETICO_PT_mesh(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+
         box = layout.box()
         row = box.row()
         row.prop(context.scene, "retico_mesh_check_only_selected",
                  text="only on selection")
 
-        box = layout.box()
-        # transfer object name to mesh name
-        row = box.row()
-        row.operator("retico.mesh_transfer_names", text="Transfer names")
+        if (
+            not bpy.context.scene.retico_mesh_check_only_selected
+            or (
+                bpy.context.scene.retico_mesh_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
 
-        # overwrite autosmooth
-        subbox = box.box()
-        row = subbox.row(align=True)
-        row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
-        row.prop(context.scene, "retico_mesh_autosmooth_angle",
-                 text="", slider=True)
-        row = subbox.row(align=True)
-        row.label(text="Custom Normals:")
-        row.operator("retico.mesh_set_custom_normals", text="Add").apply = True
-        row.operator("retico.mesh_set_custom_normals", text="Del").apply = False
+            box = layout.box()
+            # transfer object name to mesh name
+            row = box.row()
+            row.operator("retico.mesh_transfer_names", text="Transfer names")
 
-        # copy names to clipboard
-        row = box.row()
-        row.operator("retico.mesh_name_to_clipboard",
-                     text="Copy names to clipboard")
+            # overwrite autosmooth
+            subbox = box.box()
+            row = subbox.row(align=True)
+            row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
+            row.prop(context.scene, "retico_mesh_autosmooth_angle",
+                     text="", slider=True)
+            row = subbox.row(align=True)
+            row.label(text="Custom Normals:")
+            row.operator("retico.mesh_set_custom_normals",
+                         text="Add").apply = True
+            row.operator("retico.mesh_set_custom_normals",
+                         text="Del").apply = False
 
-        # report
-        box = layout.box()
-        row = box.row()
-        row.label(text="Report:")
-        row = box.row()
-        row.prop(context.scene, "retico_mesh_reports_update_selection",
-                 text="update selection")
-        row.prop(context.scene, "retico_mesh_reports_to_clipboard",
-                 text="to clipboard")
-        grid = box.grid_flow(
-            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
-        row = grid.row(align=True)
-        row.operator("retico.mesh_report_instances", text="Instances")
+            # copy names to clipboard
+            row = box.row()
+            row.operator("retico.mesh_name_to_clipboard",
+                         text="Copy names to clipboard")
+
+            # report
+            box = layout.box()
+            row = box.row()
+            row.label(text="Report:")
+            row = box.row()
+            row.prop(context.scene, "retico_mesh_reports_update_selection",
+                     text="update selection")
+            row.prop(context.scene, "retico_mesh_reports_to_clipboard",
+                     text="to clipboard")
+            grid = box.grid_flow(
+                row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+            row = grid.row(align=True)
+            row.operator("retico.mesh_report_instances", text="Instances")
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
 
 
 class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
@@ -288,6 +303,7 @@ class RETICO_OT_mesh_set_autosmooth(bpy.types.Operator):
         set_autosmooth(context.scene.retico_mesh_autosmooth_angle)
         self.report({'INFO'}, "---[ Autosmooth ]---")
         return {'FINISHED'}
+
 
 class RETICO_OT_mesh_set_custom_normals(bpy.types.Operator):
     bl_idname = "retico.mesh_set_custom_normals"

@@ -567,19 +567,31 @@ class RETICO_PT_material_misc(RETICO_PT_3dviewPanel):
     def draw(self, context):
         layout = self.layout
 
-        # backface culling
-        row = layout.row(align=True)
-        row.label(text="BackFace:")
-        row.operator("retico.material_backface", text="On").toogle = True
-        row.operator("retico.material_backface", text="Off").toogle = False
+        if (
+            not bpy.context.scene.retico_material_check_only_selected
+            or (
+                bpy.context.scene.retico_material_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
 
-        # blend mode
-        row = layout.row(align=True)
-        row.operator("retico.material_blendmode", text="Blend Mode")
+            # backface culling
+            row = layout.row(align=True)
+            row.label(text="BackFace:")
+            row.operator("retico.material_backface", text="On").toogle = True
+            row.operator("retico.material_backface", text="Off").toogle = False
 
-        # transfer name
-        row = layout.row(align=True)
-        row.operator("retico.material_transfer_names", text="Name from Object")
+            # blend mode
+            row = layout.row(align=True)
+            row.operator("retico.material_blendmode", text="Blend Mode")
+
+            # transfer name
+            row = layout.row(align=True)
+            row.operator("retico.material_transfer_names",
+                         text="Name from Object")
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
 
 
 class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
@@ -590,23 +602,34 @@ class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
     def draw(self, context):
         layout = self.layout
 
-        row = layout.row(align=True)
-        row.prop(context.scene, "retico_material_activeTex_viewShading_solid",
-                 text="set viewport shading")
-        grid = layout.grid_flow(
-            row_major=True, even_columns=True, even_rows=True, align=True)
-        row = grid.row(align=True)
-        row.operator("retico.material_active_texture",
-                     text="Albedo").texture_type = "albedo"
-        row = grid.row(align=True)
-        row.operator("retico.material_active_texture",
-                     text="ORM").texture_type = "orm"
-        row = grid.row(align=True)
-        row.operator("retico.material_active_texture",
-                     text="Normal").texture_type = "normal"
-        row = grid.row(align=True)
-        row.operator("retico.material_active_texture",
-                     text="Emissive").texture_type = "emit"
+        if (
+            not bpy.context.scene.retico_material_check_only_selected
+            or (
+                bpy.context.scene.retico_material_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
+
+            row = layout.row(align=True)
+            row.prop(context.scene, "retico_material_activeTex_viewShading_solid",
+                     text="set viewport shading")
+            grid = layout.grid_flow(
+                row_major=True, even_columns=True, even_rows=True, align=True)
+            row = grid.row(align=True)
+            row.operator("retico.material_active_texture",
+                         text="Albedo").texture_type = "albedo"
+            row = grid.row(align=True)
+            row.operator("retico.material_active_texture",
+                         text="ORM").texture_type = "orm"
+            row = grid.row(align=True)
+            row.operator("retico.material_active_texture",
+                         text="Normal").texture_type = "normal"
+            row = grid.row(align=True)
+            row.operator("retico.material_active_texture",
+                         text="Emissive").texture_type = "emit"
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
 
 
 class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
@@ -617,58 +640,69 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
     def draw(self, context):
         layout = self.layout
 
-        # muting textures
-        box = layout.box()
-        row = box.row()
-        row.label(text="CURRENTLY BROKE, IN-DEV")
-        row = box.row()
-        row.label(text="Active textures nodes:")
-        grid = box.grid_flow(
-            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_mute",
-                     text="Albedo", depress=gltf_active_texnodes["albedo"]).exclude = "albedo"
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_mute",
-                     text="Normal", depress=gltf_active_texnodes["normal"]).exclude = "normal"
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_mute",
-                     text="ORM", depress=gltf_active_texnodes["orm"]).exclude = "orm"
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_mute",
-                     text="Emissive", depress=gltf_active_texnodes["emit"]).exclude = "emit"
-        # ORM channels are not asked
-        if gltf_active_texnodes["orm_chans"] == False:
+        if (
+            not bpy.context.scene.retico_material_check_only_selected
+            or (
+                bpy.context.scene.retico_material_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
+
+            # muting textures
+            box = layout.box()
+            row = box.row()
+            row.label(text="CURRENTLY BROKE, IN-DEV")
+            row = box.row()
+            row.label(text="Active textures nodes:")
+            grid = box.grid_flow(
+                row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
             row = grid.row(align=True)
             row.operator("retico.material_gltf_mute",
-                         icon='TRIA_RIGHT', text="ORM chans", depress=gltf_active_texnodes["orm_chans"]).exclude = "orm_chans"
-        # ORM channels are asked
+                         text="Albedo", depress=gltf_active_texnodes["albedo"]).exclude = "albedo"
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         text="Normal", depress=gltf_active_texnodes["normal"]).exclude = "normal"
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         text="ORM", depress=gltf_active_texnodes["orm"]).exclude = "orm"
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         text="Emissive", depress=gltf_active_texnodes["emit"]).exclude = "emit"
+            # ORM channels are not asked
+            if gltf_active_texnodes["orm_chans"] == False:
+                row = grid.row(align=True)
+                row.operator("retico.material_gltf_mute",
+                             icon='TRIA_RIGHT', text="ORM chans", depress=gltf_active_texnodes["orm_chans"]).exclude = "orm_chans"
+            # ORM channels are asked
+            else:
+                row = grid.row(align=True)
+                row.operator("retico.material_gltf_mute",
+                             icon='TRIA_DOWN', text="ORM chans", depress=gltf_active_texnodes["orm_chans"]).exclude = "orm_chans"
+                # empty operator needed to return to line
+                row = grid.row(align=True)
+                row.operator("retico.material_gltf_mute",
+                             text="", emboss=False).exclude = ""
+                subgrid = grid.grid_flow(
+                    row_major=True, columns=1, even_columns=True, even_rows=True, align=True)
+                row = subgrid.row(align=True)
+                row.operator("retico.material_gltf_mute",
+                             text="Occlusion (R)", depress=gltf_active_texnodes["orm_chans_r"]).exclude = "orm_chans_r"
+            # global mute/unmute
+            grid = box.grid_flow(
+                row_major=True, even_columns=True, even_rows=True, align=True)
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         text="Mute all").exclude = "mute"
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_mute",
+                         text="Unmute all").exclude = "unmute"
+            # options
+            row = box.row()
+            row.prop(context.scene, "retico_material_mute_using_unlink",
+                     text="unlink nodes")
         else:
-            row = grid.row(align=True)
-            row.operator("retico.material_gltf_mute",
-                         icon='TRIA_DOWN', text="ORM chans", depress=gltf_active_texnodes["orm_chans"]).exclude = "orm_chans"
-            # empty operator needed to return to line
-            row = grid.row(align=True)
-            row.operator("retico.material_gltf_mute",
-                         text="", emboss=False).exclude = ""
-            subgrid = grid.grid_flow(
-                row_major=True, columns=1, even_columns=True, even_rows=True, align=True)
-            row = subgrid.row(align=True)
-            row.operator("retico.material_gltf_mute",
-                         text="Occlusion (R)", depress=gltf_active_texnodes["orm_chans_r"]).exclude = "orm_chans_r"
-        # global mute/unmute
-        grid = box.grid_flow(
-            row_major=True, even_columns=True, even_rows=True, align=True)
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_mute",
-                     text="Mute all").exclude = "mute"
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_mute",
-                     text="Unmute all").exclude = "unmute"
-        # options
-        row = box.row()
-        row.prop(context.scene, "retico_material_mute_using_unlink",
-                 text="unlink nodes")
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
 
 
 class RETICO_PT_material_fix(RETICO_PT_3dviewPanel):
@@ -679,16 +713,26 @@ class RETICO_PT_material_fix(RETICO_PT_3dviewPanel):
     def draw(self, context):
         layout = self.layout
 
-        grid = layout.grid_flow(
-            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+        if (
+            not bpy.context.scene.retico_material_check_only_selected
+            or (
+                bpy.context.scene.retico_material_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
+            grid = layout.grid_flow(
+                row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
 
-        # colorspace
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_colorspace", text="Colorspace")
+            # colorspace
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_colorspace", text="Colorspace")
 
-        # uv nodes
-        row = grid.row(align=True)
-        row.operator("retico.material_gltf_uvnode_naming", text="UV links")
+            # uv nodes
+            row = grid.row(align=True)
+            row.operator("retico.material_gltf_uvnode_naming", text="UV links")
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
 
 
 class RETICO_PT_material_report(RETICO_PT_3dviewPanel):
@@ -699,19 +743,30 @@ class RETICO_PT_material_report(RETICO_PT_3dviewPanel):
     def draw(self, context):
         layout = self.layout
 
-        row = layout.row()
-        row.prop(context.scene, "retico_material_reports_update_selection",
-                 text="update selection")
-        row.prop(context.scene, "retico_material_reports_to_clipboard",
-                 text="to clipboard")
-        grid = layout.grid_flow(
-            row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
-        row = grid.row(align=True)
-        row.operator("retico.material_report_none", text="no Mat")
-        row = grid.row(align=True)
-        row.operator("retico.material_report_several", text="1+ Mat")
-        row = grid.row(align=True)
-        row.operator("retico.material_report_users", text="Shared")
+        if (
+            not bpy.context.scene.retico_material_check_only_selected
+            or (
+                bpy.context.scene.retico_material_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
+
+            row = layout.row()
+            row.prop(context.scene, "retico_material_reports_update_selection",
+                     text="update selection")
+            row.prop(context.scene, "retico_material_reports_to_clipboard",
+                     text="to clipboard")
+            grid = layout.grid_flow(
+                row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
+            row = grid.row(align=True)
+            row.operator("retico.material_report_none", text="no Mat")
+            row = grid.row(align=True)
+            row.operator("retico.material_report_several", text="1+ Mat")
+            row = grid.row(align=True)
+            row.operator("retico.material_report_users", text="Shared")
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
 
 
 """
