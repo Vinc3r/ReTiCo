@@ -50,7 +50,10 @@ def transfer_names():
     ) if selected_only else selection_sets.meshes_selectable()
 
     # handling active object
-    if bpy.context.view_layer.objects.active.mode == 'EDIT':
+    if (
+        bpy.context.view_layer.objects.active
+        and bpy.context.view_layer.objects.active.mode == 'EDIT'
+    ):
         is_user_in_edit_mode = True
         bpy.ops.object.mode_set(mode='OBJECT')
 

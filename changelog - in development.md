@@ -24,3 +24,4 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 
 - Custom Normals can now be batch deleted or added (below autosmooth function)
 - [Fix](https://github.com/Vinc3r/ReTiCo/issues/72): avoid UV naming issue
+- [Fix](https://github.com/Vinc3r/ReTiCo/issues/66): transfer name doesn't crash when there isn't active object
