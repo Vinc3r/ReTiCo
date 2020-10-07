@@ -13,6 +13,12 @@ from bpy.props import (
     StringProperty
 )
 
+"""
+**********************************************************************
+*                            def section                             *
+**********************************************************************
+"""
+
 
 def rename_uv_channels():
     """ Rename UV chans using "UVMap", "UV2", "UV3", "UVx" pattern
@@ -238,12 +244,22 @@ def mesh_box_mapping(mesh, size=1.0, only_selected=False):
     return {'FINISHED'}
 
 
-class RETICO_PT_uv(bpy.types.Panel):
-    bl_label = "UVs"
-    bl_idname = "RETICO_PT_uv"
+"""
+**********************************************************************
+*                        Panel class section                         *
+**********************************************************************
+"""
+
+
+class RETICO_PT_uv_3dviewPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "ReTiCo"
+
+
+class RETICO_PT_uv(RETICO_PT_uv_3dviewPanel):
+    bl_idname = "RETICO_PT_uv"
+    bl_label = "UVs"
 
     def draw(self, context):
         layout = self.layout
@@ -253,6 +269,15 @@ class RETICO_PT_uv(bpy.types.Panel):
         row.prop(context.scene, "retico_uvs_check_only_selected",
                  text="only on selection")
 
+
+class RETICO_PT_uv_misc(RETICO_PT_uv_3dviewPanel):
+    bl_parent_id = "RETICO_PT_uv"
+    bl_idname = "RETICO_PT_uv_misc"
+    bl_label = "Misc"
+
+    def draw(self, context):
+        layout = self.layout
+
         if (
             not bpy.context.scene.retico_uvs_check_only_selected
             or (
@@ -261,30 +286,47 @@ class RETICO_PT_uv(bpy.types.Panel):
             )
         ):
 
-            box = layout.box()
             # activate
-            row = box.row(align=True)
+            row = layout.row(align=True)
             row.label(text="Active:")
             row.operator("retico.uv_activate_channel", text="1").channel = 0
             row.operator("retico.uv_activate_channel", text="2").channel = 1
             # rename channels
-            row = box.row(align=True)
+            row = layout.row(align=True)
             row.operator("retico.uv_rename_channel", text="Rename channels")
             # box mapping
-            row = box.row(align=True)
+            row = layout.row(align=True)
             row.operator("retico.uv_box_mapping", text="Box mapping")
             row.prop(context.scene, "retico_box_mapping_size", text="")
 
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
+
+
+class RETICO_PT_uv_report(RETICO_PT_uv_3dviewPanel):
+    bl_parent_id = "RETICO_PT_uv"
+    bl_idname = "RETICO_PT_uv_report"
+    bl_label = "Report"
+
+    def draw(self, context):
+        layout = self.layout
+
+        if (
+            not bpy.context.scene.retico_uvs_check_only_selected
+            or (
+                bpy.context.scene.retico_uvs_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
             # report
             box = layout.box()
-            row = box.row(align=True)
-            row.label(text="Report:")
             row = box.row()
             row.prop(context.scene, "retico_uvs_report_update_selection",
                      text="update selection")
             row.prop(context.scene, "retico_uvs_reports_to_clipboard",
                      text="to clipboard")
-            grid = box.grid_flow(
+            grid = layout.grid_flow(
                 row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
             row = grid.row(align=True)
             row.operator("retico.uv_report_none", text="no UV1").channel = 0
@@ -293,6 +335,13 @@ class RETICO_PT_uv(bpy.types.Panel):
         else:
             row = layout.row(align=True)
             row.label(text="No object in selection.")
+
+
+"""
+**********************************************************************
+*                     Operator class section                         *
+**********************************************************************
+"""
 
 
 class RETICO_OT_uv_activate_channel(bpy.types.Operator):
@@ -374,8 +423,17 @@ class RETICO_OT_uv_report_none(bpy.types.Operator):
         return {'FINISHED'}
 
 
+"""
+**********************************************************************
+* Registration                                                       *
+**********************************************************************
+"""
+
+
 classes = (
     RETICO_PT_uv,
+    RETICO_PT_uv_misc,
+    RETICO_PT_uv_report,
     RETICO_OT_uv_activate_channel,
     RETICO_OT_uv_box_mapping,
     RETICO_OT_uv_rename_channel,

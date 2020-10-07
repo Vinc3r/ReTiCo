@@ -11,6 +11,12 @@ from bpy.props import (
     StringProperty
 )
 
+"""
+**********************************************************************
+*                            def section                             *
+**********************************************************************
+"""
+
 
 def meshes_names_to_clipboard():
     """ Send object names to clipboard using "name", "name", "name", pattern
@@ -194,12 +200,22 @@ def report_instances():
         return report_message
 
 
-class RETICO_PT_mesh(bpy.types.Panel):
-    bl_label = "Meshes"
-    bl_idname = "RETICO_PT_mesh"
+"""
+**********************************************************************
+*                        Panel class section                         *
+**********************************************************************
+"""
+
+
+class RETICO_PT_mesh_3dviewPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "ReTiCo"
+
+
+class RETICO_PT_mesh(RETICO_PT_mesh_3dviewPanel):
+    bl_label = "Meshes"
+    bl_idname = "RETICO_PT_mesh"
 
     def draw(self, context):
         layout = self.layout
@@ -209,6 +225,73 @@ class RETICO_PT_mesh(bpy.types.Panel):
         row.prop(context.scene, "retico_mesh_check_only_selected",
                  text="only on selection")
 
+
+class RETICO_PT_mesh_misc(RETICO_PT_mesh_3dviewPanel):
+    bl_parent_id = "RETICO_PT_mesh"
+    bl_idname = "RETICO_PT_mesh_misc"
+    bl_label = "Misc"
+
+    def draw(self, context):
+        layout = self.layout
+        if (
+            not bpy.context.scene.retico_mesh_check_only_selected
+            or (
+                bpy.context.scene.retico_mesh_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
+            # transfer object name to mesh name
+            row = layout.row()
+            row.operator("retico.mesh_transfer_names", text="Transfer names")
+
+            # copy names to clipboard
+            row = layout.row()
+            row.operator("retico.mesh_name_to_clipboard",
+                         text="Copy names to clipboard")
+
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
+
+
+class RETICO_PT_mesh_normals(RETICO_PT_mesh_3dviewPanel):
+    bl_parent_id = "RETICO_PT_mesh"
+    bl_idname = "RETICO_PT_mesh_normals"
+    bl_label = "Normals"
+
+    def draw(self, context):
+        layout = self.layout
+        if (
+            not bpy.context.scene.retico_mesh_check_only_selected
+            or (
+                bpy.context.scene.retico_mesh_check_only_selected
+                and len(bpy.context.selected_objects) > 0
+            )
+        ):
+            # overwrite autosmooth
+            row = layout.row(align=True)
+            row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
+            row.prop(context.scene, "retico_mesh_autosmooth_angle",
+                     text="", slider=True)
+            row = layout.row(align=True)
+            row.label(text="Custom Normals:")
+            row.operator("retico.mesh_set_custom_normals",
+                         text="Add").apply = True
+            row.operator("retico.mesh_set_custom_normals",
+                         text="Del").apply = False
+        else:
+            row = layout.row(align=True)
+            row.label(text="No object in selection.")
+
+
+class RETICO_PT_mesh_report(RETICO_PT_mesh_3dviewPanel):
+    bl_parent_id = "RETICO_PT_mesh"
+    bl_idname = "RETICO_PT_mesh_report"
+    bl_label = "Report"
+
+    def draw(self, context):
+        layout = self.layout
+
         if (
             not bpy.context.scene.retico_mesh_check_only_selected
             or (
@@ -217,45 +300,27 @@ class RETICO_PT_mesh(bpy.types.Panel):
             )
         ):
 
-            box = layout.box()
-            # transfer object name to mesh name
-            row = box.row()
-            row.operator("retico.mesh_transfer_names", text="Transfer names")
-
-            # overwrite autosmooth
-            subbox = box.box()
-            row = subbox.row(align=True)
-            row.operator("retico.mesh_set_autosmooth", text="Set autosmooth")
-            row.prop(context.scene, "retico_mesh_autosmooth_angle",
-                     text="", slider=True)
-            row = subbox.row(align=True)
-            row.label(text="Custom Normals:")
-            row.operator("retico.mesh_set_custom_normals",
-                         text="Add").apply = True
-            row.operator("retico.mesh_set_custom_normals",
-                         text="Del").apply = False
-
-            # copy names to clipboard
-            row = box.row()
-            row.operator("retico.mesh_name_to_clipboard",
-                         text="Copy names to clipboard")
-
             # report
             box = layout.box()
-            row = box.row()
-            row.label(text="Report:")
             row = box.row()
             row.prop(context.scene, "retico_mesh_reports_update_selection",
                      text="update selection")
             row.prop(context.scene, "retico_mesh_reports_to_clipboard",
                      text="to clipboard")
-            grid = box.grid_flow(
+            grid = layout.grid_flow(
                 row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
             row = grid.row(align=True)
             row.operator("retico.mesh_report_instances", text="Instances")
         else:
             row = layout.row(align=True)
             row.label(text="No object in selection.")
+
+
+"""
+**********************************************************************
+*                     Operator class section                         *
+**********************************************************************
+"""
 
 
 class RETICO_OT_mesh_name_to_clipboard(bpy.types.Operator):
@@ -346,8 +411,18 @@ class RETICO_OT_mesh_report_instances(bpy.types.Operator):
         return {'FINISHED'}
 
 
+"""
+**********************************************************************
+* Registration                                                       *
+**********************************************************************
+"""
+
+
 classes = (
     RETICO_PT_mesh,
+    RETICO_PT_mesh_misc,
+    RETICO_PT_mesh_normals,
+    RETICO_PT_mesh_report,
     RETICO_OT_mesh_transfer_names,
     RETICO_OT_mesh_set_autosmooth,
     RETICO_OT_mesh_set_custom_normals,
@@ -367,7 +442,7 @@ def register():
     )
     Scene.retico_mesh_reports_update_selection = BoolProperty(
         name="Report update selection",
-        description="Reports applies on selection, or not",
+        description="Reports modify user selection",
         default=False
     )
     Scene.retico_mesh_reports_to_clipboard = BoolProperty(

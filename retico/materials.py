@@ -9,6 +9,7 @@ from bpy.props import (
     IntProperty,
     StringProperty
 )
+
 """
 **********************************************************************
 *                            local variables                         *
@@ -444,11 +445,6 @@ def gltf_mute_textures(exclude="albedo"):
 
                                 is_texnode_detected = True
 
-                        """
-                        # https://docs.blender.org/api/current/bpy.types.NodeLinks.html
-                         link = C.active_object.data.materials[0].node_tree.nodes[2].outputs['Color'].links[0]
-                         C.active_object.data.materials[0].node_tree.links.remove(link)
-                        """
     if is_texnode_detected:
         gltf_active_texnodes[exclude] = not gltf_active_texnodes[exclude]
         is_texnode_detected = False
@@ -592,18 +588,18 @@ def report_several_users():
 
 """
 **********************************************************************
-* Panel class section                                                *
+*                        Panel class section                         *
 **********************************************************************
 """
 
 
-class RETICO_PT_3dviewPanel(bpy.types.Panel):
+class RETICO_PT_material_3dviewPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "ReTiCo"
 
 
-class RETICO_PT_material(RETICO_PT_3dviewPanel):
+class RETICO_PT_material(RETICO_PT_material_3dviewPanel):
     bl_idname = "RETICO_PT_material"
     bl_label = "Materials"
 
@@ -616,7 +612,7 @@ class RETICO_PT_material(RETICO_PT_3dviewPanel):
                  text="only on selection")
 
 
-class RETICO_PT_material_misc(RETICO_PT_3dviewPanel):
+class RETICO_PT_material_misc(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
     bl_idname = "RETICO_PT_material_misc"
     bl_label = "Misc"
@@ -640,7 +636,7 @@ class RETICO_PT_material_misc(RETICO_PT_3dviewPanel):
 
             # blend mode
             row = layout.row(align=True)
-            row.operator("retico.material_blendmode", text="Blend Mode")
+            row.operator("retico.material_blendmode", text="Detect Blend Mode")
 
             # transfer name
             row = layout.row(align=True)
@@ -651,7 +647,7 @@ class RETICO_PT_material_misc(RETICO_PT_3dviewPanel):
             row.label(text="No object in selection.")
 
 
-class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
+class RETICO_PT_material_texnode(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
     bl_idname = "RETICO_PT_material_texnode"
     bl_label = "Active texture"
@@ -666,8 +662,8 @@ class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
                 and len(bpy.context.selected_objects) > 0
             )
         ):
-
-            row = layout.row(align=True)
+            box = layout.box()
+            row = box.row(align=True)
             row.prop(context.scene, "retico_material_activeTex_viewShading_solid",
                      text="set viewport shading")
             grid = layout.grid_flow(
@@ -689,7 +685,7 @@ class RETICO_PT_material_texnode(RETICO_PT_3dviewPanel):
             row.label(text="No object in selection.")
 
 
-class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
+class RETICO_PT_material_gltf(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
     bl_idname = "RETICO_PT_material_gltf"
     bl_label = "glTF workflow"
@@ -706,10 +702,9 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
         ):
 
             # muting textures
-            box = layout.box()
-            row = box.row()
+            row = layout.row()
             row.label(text="Active textures nodes:")
-            grid = box.grid_flow(
+            grid = layout.grid_flow(
                 row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
             row = grid.row(align=True)
             row.operator("retico.material_gltf_mute",
@@ -758,7 +753,7 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
                 row.operator("retico.material_gltf_mute",
                              text="Metallic (B)", depress=gltf_active_texnodes["orm_chans_B"]).exclude = "orm_chans_B"
             # global mute/unmute
-            grid = box.grid_flow(
+            grid = layout.grid_flow(
                 row_major=True, even_columns=True, even_rows=True, align=True)
             row = grid.row(align=True)
             row.operator("retico.material_gltf_mute",
@@ -771,7 +766,7 @@ class RETICO_PT_material_gltf(RETICO_PT_3dviewPanel):
             row.label(text="No object in selection.")
 
 
-class RETICO_PT_material_fix(RETICO_PT_3dviewPanel):
+class RETICO_PT_material_fix(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
     bl_idname = "RETICO_PT_material_fix"
     bl_label = "Fix"
@@ -801,7 +796,7 @@ class RETICO_PT_material_fix(RETICO_PT_3dviewPanel):
             row.label(text="No object in selection.")
 
 
-class RETICO_PT_material_report(RETICO_PT_3dviewPanel):
+class RETICO_PT_material_report(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
     bl_idname = "RETICO_PT_material_report"
     bl_label = "Report"
@@ -837,7 +832,7 @@ class RETICO_PT_material_report(RETICO_PT_3dviewPanel):
 
 """
 **********************************************************************
-* Operator class section                                             *
+*                     Operator class section                         *
 **********************************************************************
 """
 
@@ -1045,8 +1040,8 @@ def register():
         default=False
     )
     Scene.retico_material_activeTex_viewShading_solid = BoolProperty(
-        name="Set 3DView shading to Solid -> Texture",
-        description="Set 3DView shading to Solid -> Texture",
+        name="Set 3DView shading to Solid: Texture",
+        description="Set 3DView shading to Solid: Texture",
         default=True
     )
 
