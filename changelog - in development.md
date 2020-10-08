@@ -1,6 +1,6 @@
 # Dev changelog
 
-Current changes in [source folder](https://github.com/Vinc3r/BlenderScripts/tree/master/nothing-is-3d).
+Current changes in [retico source folder](https://github.com/Vinc3r/ReTiCo/tree/master/reticod).
 
 Usually in-dev version is usable... but bugs can appears of course.
 
