@@ -19,6 +19,7 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 
 - glTF workflow: new way for muting textures
 - glTF workflow: allow to mute individual ORM channels (by unlinking outputs of SEPRGB node)
+- emissive texture node are detected more efficiently
 
 ### Meshes
 
