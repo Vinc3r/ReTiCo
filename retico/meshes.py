@@ -3,12 +3,8 @@ import math
 from . import selection_sets
 from bpy.types import Scene
 from bpy.props import (
-    EnumProperty,
     FloatProperty,
-    FloatVectorProperty,
-    BoolProperty,
-    IntProperty,
-    StringProperty
+    BoolProperty
 )
 
 """

@@ -2,11 +2,7 @@ import bpy
 from . import selection_sets
 from bpy.types import Scene
 from bpy.props import (
-    EnumProperty,
-    FloatProperty,
-    FloatVectorProperty,
     BoolProperty,
-    IntProperty,
     StringProperty
 )
 
@@ -33,6 +29,31 @@ gltf_active_texnodes = {
 *                            def section                             *
 **********************************************************************
 """
+
+
+def check_if_is_linked_to_active_output(node):
+    """ Based on glTF-Blender-IO addon,
+        adapted for this addon
+    """
+    if len(node.outputs) > 0:
+        for out in node.outputs:
+            for link in out.links:
+                if (
+                    isinstance(
+                        link.to_node, bpy.types.ShaderNodeOutputMaterial)
+                    and link.to_node.is_active_output is True
+                ):
+                    return True
+
+                # ignore non active output, not having output sockets
+                if len(link.to_node.outputs) > 0:
+                    # recursive until find an output material node
+                    ret = check_if_is_linked_to_active_output(
+                        link.to_node)
+                    if ret is True:
+                        return True
+
+    return False
 
 
 def set_backface_culling(toggle):
@@ -336,8 +357,10 @@ def gltf_mute_textures(exclude="albedo"):
                         if node.type == 'SEPRGB':
                             for out in node.outputs:
                                 if not out.is_linked:
+                                    active_principled = [node for node in mat.node_tree.nodes if (
+                                        node.type == 'BSDF_PRINCIPLED' and check_if_is_linked_to_active_output(node))][0]
                                     # roughness (G) by default
-                                    input = mat.node_tree.nodes['Principled BSDF'].inputs['Roughness']
+                                    input = active_principled.inputs['Roughness']
                                     # occlusion specific
                                     if out.name == "R":
                                         gltfSettings = [node for node in mat.node_tree.nodes if (
@@ -349,7 +372,7 @@ def gltf_mute_textures(exclude="albedo"):
                                             input = gltfSettings.inputs['Occlusion']
                                     # metallic
                                     elif out.name == "B":
-                                        input = mat.node_tree.nodes['Principled BSDF'].inputs['Metallic']
+                                        input = active_principled.inputs['Metallic']
 
                                     mat.node_tree.links.new(
                                         input, out, verify_limits=True)
@@ -428,9 +451,11 @@ def gltf_mute_textures(exclude="albedo"):
                                 # for ORM, we need to reset some settings
                                 if exclude == "orm":
                                     chan_target = ["R", "G", "B"]
+                                    active_principled = [node for node in mat.node_tree.nodes if (
+                                        node.type == 'BSDF_PRINCIPLED' and check_if_is_linked_to_active_output(node))][0]
                                     for chan in chan_target:
                                         # roughness (G) by default
-                                        input = mat.node_tree.nodes['Principled BSDF'].inputs['Roughness']
+                                        input = active_principled.inputs['Roughness']
                                         # occlusion specific
                                         if chan == "R":
                                             gltfSettings = [node for node in mat.node_tree.nodes if (
@@ -442,7 +467,7 @@ def gltf_mute_textures(exclude="albedo"):
                                                 input = gltfSettings.inputs['Occlusion']
                                         # metallic
                                         elif chan == "B":
-                                            input = mat.node_tree.nodes['Principled BSDF'].inputs['Metallic']
+                                            input = active_principled.inputs['Metallic']
 
                                         sepRGB = [
                                             node for node in mat.node_tree.nodes if node.type == 'SEPRGB'][0]
@@ -465,6 +490,8 @@ def gltf_mute_textures(exclude="albedo"):
                             ):
 
                                 gltf_active_texnodes["orm"] = False
+                                active_principled = [node for node in mat.node_tree.nodes if (
+                                    node.type == 'BSDF_PRINCIPLED' and check_if_is_linked_to_active_output(node))][0]
 
                                 # occlusion (R) roughness (G) metallic (B)
                                 chan_name = exclude.split("orm_chans_")[1]
@@ -482,7 +509,7 @@ def gltf_mute_textures(exclude="albedo"):
                                     mat.node_tree.links.remove(link)
                                 # link
                                 else:
-                                    input = mat.node_tree.nodes['Principled BSDF'].inputs[chan_target]
+                                    input = active_principled.inputs[chan_target]
                                     # occlusion specific
                                     if chan_name == "R":
                                         gltfSettings = [node for node in mat.node_tree.nodes if (

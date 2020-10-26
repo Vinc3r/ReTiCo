@@ -5,12 +5,9 @@ from math import sin, cos, pi
 from mathutils import Vector
 from bpy.types import Scene
 from bpy.props import (
-    EnumProperty,
     FloatProperty,
-    FloatVectorProperty,
     BoolProperty,
-    IntProperty,
-    StringProperty
+    IntProperty
 )
 
 """
