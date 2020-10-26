@@ -1,7 +1,7 @@
 bl_info = {
     "name": "ReTiCo (RealTime Companion)",
     "description": "RealTime Companion, a 3D realtime workflow addon oriented.",
-    "author": "Vincent (V!nc3r) Lamy, CStfan",
+    "author": "Vincent (V!nc3r) Lamy ; for some bits of code: nutti (MagicUV), glTF addon developpers ; CStfan (beta testing)",
     "category": "3D View",
     "wiki_url": 'https://github.com/Vinc3r/ReTiCo/wiki#retico',
     "tracker_url": 'https://github.com/Vinc3r/ReTiCo/issues',
