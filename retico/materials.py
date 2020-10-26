@@ -332,6 +332,28 @@ def gltf_mute_textures(exclude="albedo"):
                     if exclude == "unmute":
                         # in case we just want to unmute, no need to go further
                         node.mute = False
+                        # as SEPRGB can be unliked, we have to relink if so
+                        if node.type == 'SEPRGB':
+                            for out in node.outputs:
+                                if not out.is_linked:
+                                    # roughness (G) by default
+                                    input = mat.node_tree.nodes['Principled BSDF'].inputs['Roughness']
+                                    # occlusion specific
+                                    if out.name == "R":
+                                        gltfSettings = [node for node in mat.node_tree.nodes if (
+                                            node.type == 'GROUP'
+                                            and node.node_tree.original == bpy.data.node_groups['glTF Settings']
+                                        )]
+                                        if len(gltfSettings) > 0:
+                                            gltfSettings = gltfSettings[0]
+                                            input = gltfSettings.inputs['Occlusion']
+                                    # metallic
+                                    elif out.name == "B":
+                                        input = mat.node_tree.nodes['Principled BSDF'].inputs['Metallic']
+
+                                    mat.node_tree.links.new(
+                                        input, out, verify_limits=True)
+                        # save the status
                         for textype in gltf_active_texnodes:
                             if textype != "orm_chans":
                                 gltf_active_texnodes[textype] = True
@@ -407,6 +429,7 @@ def gltf_mute_textures(exclude="albedo"):
                                 if exclude == "orm":
                                     chan_target = ["R", "G", "B"]
                                     for chan in chan_target:
+                                        # roughness (G) by default
                                         input = mat.node_tree.nodes['Principled BSDF'].inputs['Roughness']
                                         # occlusion specific
                                         if chan == "R":
