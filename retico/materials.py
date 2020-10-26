@@ -488,7 +488,6 @@ def gltf_mute_textures(exclude="albedo"):
                                 exclude.find("orm_chans_") != -1
                                 and node.type == 'SEPRGB'
                             ):
-
                                 gltf_active_texnodes["orm"] = False
                                 active_principled = [node for node in mat.node_tree.nodes if (
                                     node.type == 'BSDF_PRINCIPLED' and check_if_is_linked_to_active_output(node))][0]
