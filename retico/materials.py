@@ -89,20 +89,12 @@ def set_blendmode():
     return {'FINISHED'}
 
 
-def set_active_texture(type="albedo"):
+def set_active_texture(textureType="albedo"):
     """ Set a specific texture node to active,
         useful when viewport is shade as Solid -> Texture
     """
     # var init
     selected_only = bpy.context.scene.retico_material_check_only_selected
-    # texture_condition = [node.type, node.output.type, node.output.link.to_node.type], default: albedo
-    texture_condition = ['TEX_IMAGE', 'RGBA', 'BSDF_PRINCIPLED']
-    if type == "orm":
-        texture_condition = ['TEX_IMAGE', 'RGBA', 'SEPRGB']
-    elif type == "normal":
-        texture_condition = ['TEX_IMAGE', 'RGBA', 'NORMAL_MAP']
-    elif type == "emit":
-        texture_condition = ['TEX_IMAGE', 'RGBA', 'EMISSION']
     objects_selected = selection_sets.meshes_with_materials(selected_only)
 
     # function core
@@ -111,20 +103,47 @@ def set_active_texture(type="albedo"):
         for mat in mesh.materials:
             if mat.use_nodes:
                 for node in mat.node_tree.nodes:
-                    if node.type != texture_condition[0]:
-                        # node have to pass first tests
+                    if node.type != 'TEX_IMAGE':
+                        # we only want textures
                         continue
                     for out in node.outputs:
-                        if out.type != texture_condition[1]:
-                            # output have to pass test
+                        if out.type != 'RGBA':
+                            # just need color output
                             continue
                         for link in out.links:
-                            if link.to_node.type != texture_condition[2]:
-                                # link have to pass test
-                                continue
-                            # ok we're sure about this node, let's make it active
-                            node.select = True
-                            mat.node_tree.nodes.active = node
+                            if (
+                                (textureType == "albedo"
+                                 and link.to_node.type == 'BSDF_PRINCIPLED'
+                                 and link.to_socket.name == 'Base Color'
+                                 )
+                                or (
+                                    textureType == "orm"
+                                    and link.to_node.type == 'SEPRGB'
+                                    and link.to_socket.name == 'Image'
+                                )
+                                or (
+                                    textureType == "normal"
+                                    and link.to_node.type == 'NORMAL_MAP'
+                                    and link.to_socket.name == 'Color'
+                                )
+                                or (
+                                    textureType == "emit"
+                                    and (
+                                        (
+                                            # linked to Emission node
+                                            link.to_node.type == 'EMISSION'
+                                            and link.to_socket.name == 'Color'
+                                        )
+                                        or(
+                                            # linked to Principled
+                                            link.to_node.type == 'BSDF_PRINCIPLED'
+                                            and link.to_socket.name == 'Emission'
+                                        )
+                                    )
+                                )
+                            ):
+                                node.select = True
+                                mat.node_tree.nodes.active = node
 
     # update viewport
     bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
@@ -199,9 +218,19 @@ def gltf_fix_colorspace():
                         for link in out.links:
                             # only albedo and emit are sRGB
                             if (
-                                (link.to_node.type == 'BSDF_PRINCIPLED'
-                                    and link.to_socket.name == 'Base Color')
-                                or link.to_node.type == 'EMISSION'
+                                (
+                                    # albedo
+                                    link.to_node.type == 'BSDF_PRINCIPLED'
+                                    and link.to_socket.name == 'Base Color'
+                                )
+                                or (
+                                    # emit
+                                    link.to_node.type == 'EMISSION'
+                                    or (
+                                        link.to_node.type == 'BSDF_PRINCIPLED'
+                                        and link.to_socket.name == 'Emission'
+                                    )
+                                )
                             ):
                                 node.image.colorspace_settings.name = 'sRGB'
                             else:
@@ -355,8 +384,13 @@ def gltf_mute_textures(exclude="albedo"):
                                     or (
                                         exclude == "emit"
                                         and (
-                                            out.links[0].to_node.type == 'EMISSION'
-                                            or node.type == 'EMISSION'
+                                            node.type == 'EMISSION'
+                                            or out.links[0].to_node.type == 'EMISSION'
+                                            or (
+                                                # linked to Principled
+                                                out.links[0].to_node.type == 'BSDF_PRINCIPLED'
+                                                and out.links[0].to_socket.name == 'Emission'
+                                            )
                                         )
                                     )
                                     # orm nodes
