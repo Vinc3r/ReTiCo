@@ -537,15 +537,35 @@ def gltf_mute_textures(exclude="albedo"):
                                     "Roughness" if chan_name == "G" else "Metallic")
 
                                 # unlink
-                                if (
-                                    gltf_active_texnodes["orm_chans_{}".format(
-                                        chan_name)]
-                                    and node.type == 'SEPRGB'
-                                    and len(node.outputs[chan_name].links) > 0
-                                ):
-                                    link = node.outputs[chan_name].links[0]
-                                    mat.node_tree.links.remove(link)
+
+                                if gltf_active_texnodes["orm_chans_{}".format(
+                                        chan_name)]:
+                                    if(
+                                       node.type == 'SEPRGB'
+                                       and len(node.outputs[chan_name].links) > 0
+                                       ):
+                                        link = node.outputs[chan_name].links[0]
+                                        mat.node_tree.links.remove(link)
+                                    elif (
+                                        # orm as separated images
+                                        node.type == 'TEX_IMAGE'
+                                        and len(out.links) > 0
+                                    ):
+                                        if (
+                                            (chan_name == "R"
+                                             and out.links[0].to_socket.name == "Occlusion")
+                                            or (chan_name == "G"
+                                                and out.links[0].to_socket.name == "Roughness")
+                                            or (chan_name == "B"
+                                                and out.links[0].to_socket.name == "Metallic")
+                                        ):
+                                            # as image are separated, no need to unlink
+                                            print("mute {}, {}".format(
+                                                node.label, chan_name))
+                                            node.mute = True
+
                                 # link
+
                                 else:
                                     input = active_principled.inputs[chan_target]
                                     # occlusion specific
@@ -560,13 +580,35 @@ def gltf_mute_textures(exclude="albedo"):
                                             input = gltfSettings.inputs['Occlusion']
                                             output = ""
                                             if node.type == 'SEPRGB':
-                                                output = node.outputs[chan_name] 
+                                                output = node.outputs[chan_name]
                                                 mat.node_tree.links.new(
                                                     input, output, verify_limits=True)
+                                            elif (
+                                                # orm as separated images
+                                                node.type == 'TEX_IMAGE'
+                                                and len(out.links) > 0
+                                                and out.links[0].to_socket.name == "Occlusion"
+                                            ):
+                                                node.mute = False
                                     elif node.type == 'SEPRGB':
-                                            output = node.outputs[chan_name]
-                                            mat.node_tree.links.new(
-                                                input, output, verify_limits=True)
+                                        output = node.outputs[chan_name]
+                                        mat.node_tree.links.new(
+                                            input, output, verify_limits=True)
+                                    elif (
+                                        # orm as separated images
+                                        node.type == 'TEX_IMAGE'
+                                        and len(out.links) > 0
+                                    ):
+                                        if (
+                                            (chan_name == "R"
+                                             and out.links[0].to_socket.name == "Occlusion")
+                                            or (chan_name == "G"
+                                                and out.links[0].to_socket.name == "Roughness")
+                                            or (chan_name == "B"
+                                                and out.links[0].to_socket.name == "Metallic")
+                                        ):
+                                            # as image are separated, no need to relink
+                                            node.mute = False
 
                                 is_texnode_detected = True
 
