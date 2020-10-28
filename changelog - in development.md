@@ -13,12 +13,13 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 
 ### General
 
-- detect if selection is empty while "only on selection" is active, and tell the user about the situation
+- New: detect if selection is empty while "only on selection" is active, and tell the user about the situation
 
 ### Materials
 
-- glTF workflow: new way for muting textures
-- glTF workflow: allow to mute individual ORM channels (by unlinking outputs of SEPRGB node)
+- glTF workflow: allow to mute/unmute individual ORM channels
+    - if ORM is a unique image, ReTiCo unlink/link outputs to the SEPRGB node
+    - if ORM are separated images, ReTiCo just mute indivudual texture nodes
 - emissive texture node are detected more efficiently
 
 ### Meshes
