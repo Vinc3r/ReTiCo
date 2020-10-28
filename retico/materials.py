@@ -442,8 +442,20 @@ def gltf_mute_textures(exclude="albedo"):
                                     or (
                                         exclude == "orm"
                                         and (
-                                            node.type == 'SEPRGB'
-                                            or out.links[0].to_node.type == 'SEPRGB'
+                                            (
+                                                # using SEPRGB node
+                                                node.type == 'SEPRGB'
+                                                or out.links[0].to_node.type == 'SEPRGB'
+                                            )
+                                            or (
+                                                # orm as separated images
+                                                node.type == 'TEX_IMAGE'
+                                                and (
+                                                    out.links[0].to_socket.name == "Occlusion"
+                                                    or out.links[0].to_socket.name == "Roughness"
+                                                    or out.links[0].to_socket.name == "Metallic"
+                                                )
+                                            )
                                         )
                                     )
                                 )
@@ -469,12 +481,17 @@ def gltf_mute_textures(exclude="albedo"):
                                         elif chan == "B":
                                             input = active_principled.inputs['Metallic']
 
+                                        # checking if sepRGB exists
                                         sepRGB = [
-                                            node for node in mat.node_tree.nodes if node.type == 'SEPRGB'][0]
-                                        output = sepRGB.outputs[chan]
-                                        if not sepRGB.outputs[chan].is_linked:
-                                            mat.node_tree.links.new(
-                                                input, output, verify_limits=True)
+                                            node for node in mat.node_tree.nodes if node.type == 'SEPRGB']
+                                        if len(sepRGB) > 0:
+                                            sepRGB = sepRGB[0]
+
+                                            output = sepRGB.outputs[chan]
+
+                                            if not sepRGB.outputs[chan].is_linked:
+                                                mat.node_tree.links.new(
+                                                    input, output, verify_limits=True)
 
                                     gltf_active_texnodes["orm_chans"] = False
                                     gltf_active_texnodes["orm_chans_R"] = True
@@ -486,7 +503,28 @@ def gltf_mute_textures(exclude="albedo"):
 
                             elif (
                                 exclude.find("orm_chans_") != -1
-                                and node.type == 'SEPRGB'
+                                and (
+                                    (
+                                        # using SEPRGB node
+                                        node.type == 'SEPRGB'
+                                        or (
+                                            len(out.links) > 0
+                                            and out.links[0].to_node.type == 'SEPRGB'
+                                        )
+                                    )
+                                    or (
+                                        # orm as separated images
+                                        node.type == 'TEX_IMAGE'
+                                        and (
+                                            len(out.links) > 0
+                                            and (
+                                                out.links[0].to_socket.name == "Occlusion"
+                                                or out.links[0].to_socket.name == "Roughness"
+                                                or out.links[0].to_socket.name == "Metallic"
+                                            )
+                                        )
+                                    )
+                                )
                             ):
                                 gltf_active_texnodes["orm"] = False
                                 active_principled = [node for node in mat.node_tree.nodes if (
@@ -502,6 +540,7 @@ def gltf_mute_textures(exclude="albedo"):
                                 if (
                                     gltf_active_texnodes["orm_chans_{}".format(
                                         chan_name)]
+                                    and node.type == 'SEPRGB'
                                     and len(node.outputs[chan_name].links) > 0
                                 ):
                                     link = node.outputs[chan_name].links[0]
@@ -511,6 +550,7 @@ def gltf_mute_textures(exclude="albedo"):
                                     input = active_principled.inputs[chan_target]
                                     # occlusion specific
                                     if chan_name == "R":
+                                        # glTFSettings node detection
                                         gltfSettings = [node for node in mat.node_tree.nodes if (
                                             node.type == 'GROUP'
                                             and node.node_tree.original == bpy.data.node_groups['glTF Settings']
@@ -518,13 +558,15 @@ def gltf_mute_textures(exclude="albedo"):
                                         if len(gltfSettings) > 0:
                                             gltfSettings = gltfSettings[0]
                                             input = gltfSettings.inputs['Occlusion']
+                                            output = ""
+                                            if node.type == 'SEPRGB':
+                                                output = node.outputs[chan_name] 
+                                                mat.node_tree.links.new(
+                                                    input, output, verify_limits=True)
+                                    elif node.type == 'SEPRGB':
                                             output = node.outputs[chan_name]
                                             mat.node_tree.links.new(
                                                 input, output, verify_limits=True)
-                                    else:
-                                        output = node.outputs[chan_name]
-                                        mat.node_tree.links.new(
-                                            input, output, verify_limits=True)
 
                                 is_texnode_detected = True
 
