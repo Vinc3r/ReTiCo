@@ -9,11 +9,13 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 ---
 ## Doc' modification needs:
 * [ ] custom normals change, below autosmooth
+* [ ] new UI
 ---
 
 ### General
 
 - New: detect if selection is empty while "only on selection" is active, and tell the user about the situation
+- New: UI is now splitted into sub-categories, allowing better navigation
 
 ### Materials
 
