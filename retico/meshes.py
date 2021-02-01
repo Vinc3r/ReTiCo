@@ -55,9 +55,10 @@ def transfer_names():
 
     # function core
     for obj in objects_selected:
-        bpy.context.view_layer.objects.active = obj
-        mesh = obj.data
-        mesh.name = obj.name
+        obj.data.name = "tmp" # temp name to avoid naming conflict later
+
+    for obj in objects_selected:
+        obj.data.name = obj.name
 
     # handling active object
     bpy.context.view_layer.objects.active = user_active

@@ -7,3 +7,4 @@ Thumbs.db
 .directory
 *__pycache__*
 .vscode/*
+retico/.vscode/*
