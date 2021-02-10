@@ -6,5 +6,5 @@
 
 Check [Documentation to know more](https://github.com/Vinc3r/ReTiCo/wiki) ([installation](https://github.com/Vinc3r/ReTiCo/wiki/Installation) / [documentation](https://github.com/Vinc3r/ReTiCo/wiki/Documentation) / [changelog](https://github.com/Vinc3r/ReTiCo/wiki/Changelog)).
 
-![retico ui](https://raw.githubusercontent.com/wiki/Vinc3r/ReTiCo/img/blender2.8-ui.png)
+![retico ui](https://raw.githubusercontent.com/wiki/Vinc3r/ReTiCo/img/global-ui.png)
 
