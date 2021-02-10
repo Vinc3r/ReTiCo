@@ -215,6 +215,15 @@ def transfer_names():
 
     return {'FINISHED'}
 
+def reload_textures():
+    """ Refresh all textures files
+    """
+
+    for img in bpy.data.images:
+        img.reload()
+
+    return {'FINISHED'}
+
 
 def gltf_fix_colorspace():
     """ Set albedo & emit as sRGB colorspace, non-color if not
@@ -809,9 +818,19 @@ class RETICO_PT_material_misc(RETICO_PT_material_3dviewPanel):
             row = layout.row(align=True)
             row.operator("retico.material_transfer_names",
                          text="Name from Object")
+
         else:
             row = layout.row(align=True)
             row.label(text="No object in selection.")
+
+        #
+        # buttons below dont care about selection
+        #
+
+        # reload textures
+        row = layout.row(align=True)
+        row.operator("retico.material_reload_textures",
+                        text="Reload Textures")
 
 
 class RETICO_PT_material_texnode(RETICO_PT_material_3dviewPanel):
@@ -1038,6 +1057,19 @@ class RETICO_OT_material_transfer_names(bpy.types.Operator):
         transfer_names()
         return {'FINISHED'}
 
+class RETICO_OT_material_reload_textures(bpy.types.Operator):
+    bl_idname = "retico.material_reload_textures"
+    bl_label = "Refresh texture files"
+    bl_description = "Refresh texture files"
+
+    @classmethod
+    def poll(cls, context):
+        return len(bpy.data.images) > 0
+
+    def execute(self, context):
+        reload_textures()
+        return {'FINISHED'}
+
 
 class RETICO_OT_material_gltf_mute(bpy.types.Operator):
     bl_idname = "retico.material_gltf_mute"
@@ -1177,6 +1209,7 @@ classes = (
     RETICO_OT_material_backface,
     RETICO_OT_material_blendmode,
     RETICO_OT_material_transfer_names,
+    RETICO_OT_material_reload_textures,
     RETICO_OT_material_gltf_mute,
     RETICO_OT_material_active_texture,
     RETICO_OT_material_gltf_colorspace,
