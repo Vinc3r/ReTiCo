@@ -5,14 +5,14 @@ bl_info = {
     "category": "3D View",
     "wiki_url": 'https://github.com/Vinc3r/ReTiCo/wiki#retico',
     "tracker_url": 'https://github.com/Vinc3r/ReTiCo/issues',
-    "version": (2021, 2, 10),
-    "blender": (2, 91, 0)
+    "version": (2021, 10, 11),
+    "blender": (2, 93, 0)
 }
 
 """A bunch of Thanks for some snippets, ideas, inspirations, to:
     - of course, Ton & all Blender devs,
     - Henri Hebeisen (henri-hebeisen.com), Pitiwazou (pitiwazou.com), Pistiwique (github.com/pistiwique),
-    - and finally all Blender community and the ones I forget.
+    - all Blender community and the ones I forget.
     - Cstfan for his feedbacks
 """
 

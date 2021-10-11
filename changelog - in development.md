@@ -11,3 +11,7 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 
 - Ability to reload all textures (*needs doc update*)
 
+## Meshes
+
+- meshes names to clipboard is now sort alphabetically
+

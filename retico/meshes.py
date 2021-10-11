@@ -18,18 +18,27 @@ def meshes_names_to_clipboard():
     """ Send object names to clipboard using "name", "name", "name", pattern
     """
     # var init
+    meshes_names_to_list = []
     meshes_names_to_clipboard = ""
     selected_only = bpy.context.scene.retico_mesh_check_only_selected
     objects_selected = selection_sets.meshes_in_selection(
     ) if selected_only else selection_sets.meshes_selectable()
 
     # function core
-    for obj in objects_selected:
-        if obj is objects_selected[-1]:
-            meshes_names_to_clipboard += '"{}"'.format(obj.name)
-        else:
-            meshes_names_to_clipboard += '"{}",'.format(obj.name)
 
+    ## getting a list, to be able to sort alphabetically
+    for obj in objects_selected:
+        meshes_names_to_list.append(obj.name)
+    meshes_names_to_list = sorted(meshes_names_to_list, key=str.lower)
+
+    ## converting all list items to a single string
+    for name in meshes_names_to_list:
+        if name is meshes_names_to_list[-1]:
+            meshes_names_to_clipboard += f'"{name}"'
+        else:
+            meshes_names_to_clipboard += f'"{name}", '
+
+    ## sending to clipboard
     bpy.context.window_manager.clipboard = meshes_names_to_clipboard
 
     return {'FINISHED'}
