@@ -10,6 +10,7 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 
 
 - Ability to reload all textures (*needs doc update*)
+- Detect and activate custom output by label
 
 ## Meshes
 
