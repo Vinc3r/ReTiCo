@@ -887,8 +887,7 @@ class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):
                      text="Detect Outputs", icon='VIEWZOOM')
 
         # Show outputs list
-        # if len(outputs_labels) < 2:
-        if True == False:
+        if len(outputs_labels) < 2:
             row = layout.row()
             row.label(text="No custom labels found")
         else:
