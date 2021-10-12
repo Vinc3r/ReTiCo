@@ -216,6 +216,7 @@ def transfer_names():
 
     return {'FINISHED'}
 
+
 def reload_textures():
     """ Refresh all textures files
     """
@@ -762,6 +763,7 @@ def report_several_users():
 
     return message_several_users, is_all_good
 
+
 def detect_outputs_labels():
     """ Detect all material outputs labels name
     """
@@ -780,6 +782,7 @@ def detect_outputs_labels():
 
     return {'FINISHED'}
 
+
 def activate_outputs_by_labels(label):
     """ Activate output node corresponding to label name
     """
@@ -794,6 +797,7 @@ def activate_outputs_by_labels(label):
                     node.is_active_output = True
 
     return {'FINISHED'}
+
 
 """
 **********************************************************************
@@ -840,12 +844,15 @@ class RETICO_PT_material_misc(RETICO_PT_material_3dviewPanel):
             # backface culling
             row = layout.row(align=True)
             row.label(text="BackFace:")
-            row.operator("retico.material_backface", text="On", icon='RADIOBUT_OFF').toogle = True
-            row.operator("retico.material_backface", text="Off", icon='RADIOBUT_ON').toogle = False
+            row.operator("retico.material_backface", text="On",
+                         icon='RADIOBUT_OFF').toogle = True
+            row.operator("retico.material_backface", text="Off",
+                         icon='RADIOBUT_ON').toogle = False
 
             # blend mode
             row = layout.row(align=True)
-            row.operator("retico.material_blendmode", text="Detect Blend Mode", icon='OVERLAY')
+            row.operator("retico.material_blendmode",
+                         text="Detect Blend Mode", icon='OVERLAY')
 
             # transfer name
             row = layout.row(align=True)
@@ -863,7 +870,8 @@ class RETICO_PT_material_misc(RETICO_PT_material_3dviewPanel):
         # reload textures
         row = layout.row(align=True)
         row.operator("retico.material_reload_textures",
-                        text="Reload Textures", icon='TEXTURE')
+                     text="Reload Textures", icon='TEXTURE')
+
 
 class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material_misc"
@@ -875,7 +883,8 @@ class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):
 
         # Detect outputs labels
         row = layout.row()
-        row.operator("retico.material_outputs_detect", text="Detect Outputs", icon='VIEWZOOM')
+        row.operator("retico.material_outputs_detect",
+                     text="Detect Outputs", icon='VIEWZOOM')
 
         # Show outputs list
         # if len(outputs_labels) < 2:
@@ -889,9 +898,12 @@ class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):
             for label in outputs_labels:
                 row = grid.row(align=True)
                 if label is "":
-                    row.operator("retico.material_outputs_activate", text=f"Default (empty)").label = label
+                    row.operator("retico.material_outputs_activate",
+                                 text=f"Default (empty)").label = label
                 else:
-                    row.operator("retico.material_outputs_activate", text=f"{label}").label = label
+                    row.operator("retico.material_outputs_activate",
+                                 text=f"{label}").label = label
+
 
 class RETICO_PT_material_texnode(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
@@ -1117,6 +1129,7 @@ class RETICO_OT_material_transfer_names(bpy.types.Operator):
         transfer_names()
         return {'FINISHED'}
 
+
 class RETICO_OT_material_reload_textures(bpy.types.Operator):
     bl_idname = "retico.material_reload_textures"
     bl_label = "Refresh texture files"
@@ -1280,6 +1293,7 @@ class RETICO_OT_material_outputs_activate(bpy.types.Operator):
     def execute(self, context):
         activate_outputs_by_labels(self.label)
         return {'FINISHED'}
+
 
 """
 **********************************************************************
