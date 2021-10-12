@@ -840,17 +840,17 @@ class RETICO_PT_material_misc(RETICO_PT_material_3dviewPanel):
             # backface culling
             row = layout.row(align=True)
             row.label(text="BackFace:")
-            row.operator("retico.material_backface", text="On").toogle = True
-            row.operator("retico.material_backface", text="Off").toogle = False
+            row.operator("retico.material_backface", text="On", icon='RADIOBUT_OFF').toogle = True
+            row.operator("retico.material_backface", text="Off", icon='RADIOBUT_ON').toogle = False
 
             # blend mode
             row = layout.row(align=True)
-            row.operator("retico.material_blendmode", text="Detect Blend Mode")
+            row.operator("retico.material_blendmode", text="Detect Blend Mode", icon='OVERLAY')
 
             # transfer name
             row = layout.row(align=True)
             row.operator("retico.material_transfer_names",
-                         text="Name from Object")
+                         text="Name from Object", icon='SORTALPHA')
 
         else:
             row = layout.row(align=True)
@@ -863,7 +863,7 @@ class RETICO_PT_material_misc(RETICO_PT_material_3dviewPanel):
         # reload textures
         row = layout.row(align=True)
         row.operator("retico.material_reload_textures",
-                        text="Reload Textures")
+                        text="Reload Textures", icon='TEXTURE')
 
 class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material_misc"
