@@ -23,6 +23,7 @@ gltf_active_texnodes = {
     "emit": True
 }
 
+outputs_labels = []
 
 """
 **********************************************************************
@@ -761,6 +762,37 @@ def report_several_users():
 
     return message_several_users, is_all_good
 
+def detect_outputs_labels():
+    """ Detect all material outputs labels name
+    """
+    for mat in bpy.data.materials:
+        if mat.use_nodes:
+            for node in mat.node_tree.nodes:
+                if node.type != 'OUTPUT_MATERIAL':
+                    continue
+                is_label_in_list = False
+                for label in outputs_labels:
+                    if node.label == label:
+                        is_label_in_list = True
+                if not is_label_in_list:
+                    outputs_labels.append(node.label)
+
+    return {'FINISHED'}
+
+def activate_outputs_by_labels(label):
+    """ Activate output node corresponding to label name
+    """
+    for mat in bpy.data.materials:
+        if mat.use_nodes:
+            for node in mat.node_tree.nodes:
+                if node.type != 'OUTPUT_MATERIAL':
+                    continue
+                # set this property below to False is needed
+                node.is_active_output = False
+                if node.label == label:
+                    node.is_active_output = True
+
+    return {'FINISHED'}
 
 """
 **********************************************************************
@@ -832,6 +864,32 @@ class RETICO_PT_material_misc(RETICO_PT_material_3dviewPanel):
         row.operator("retico.material_reload_textures",
                         text="Reload Textures")
 
+class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):
+    bl_parent_id = "RETICO_PT_material_misc"
+    bl_idname = "RETICO_PT_material_misc_outputs"
+    bl_label = "Outputs"
+
+    def draw(self, context):
+        layout = self.layout
+
+        # Detect outputs labels
+        row = layout.row()
+        row.operator("retico.material_outputs_detect", text="Detect Outputs", icon='VIEWZOOM')
+
+        # Show outputs list
+        if len(outputs_labels) < 2:
+            row = layout.row()
+            row.label(text="No custom labels found")
+        else:
+            row = layout.row()
+            row.label(text="Activate:")
+            grid = layout.grid_flow(columns=1, align=True)
+            for label in outputs_labels:
+                row = grid.row(align=True)
+                if label is "":
+                    row.operator("retico.material_outputs_activate", text=f"Default (empty)").label = label
+                else:
+                    row.operator("retico.material_outputs_activate", text=f"{label}").label = label
 
 class RETICO_PT_material_texnode(RETICO_PT_material_3dviewPanel):
     bl_parent_id = "RETICO_PT_material"
@@ -1193,6 +1251,34 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class RETICO_OT_material_outputs_detect(bpy.types.Operator):
+    bl_idname = "retico.material_outputs_detect"
+    bl_label = "Detect outputs"
+    bl_description = "Detect custom outputs labels"
+
+    @classmethod
+    def poll(cls, context):
+        return len(bpy.data.materials) > 0
+
+    def execute(self, context):
+        detect_outputs_labels()
+        return {'FINISHED'}
+
+
+class RETICO_OT_material_outputs_activate(bpy.types.Operator):
+    bl_idname = "retico.material_outputs_activate"
+    bl_label = "Activate output"
+    bl_description = "Activate output by label"
+    label: StringProperty(default="")
+
+    @classmethod
+    def poll(cls, context):
+        return len(bpy.data.materials) > 0
+
+    def execute(self, context):
+        activate_outputs_by_labels(self.label)
+        return {'FINISHED'}
+
 """
 **********************************************************************
 * Registration                                                       *
@@ -1202,6 +1288,7 @@ class RETICO_OT_material_report_users(bpy.types.Operator):
 classes = (
     RETICO_PT_material,
     RETICO_PT_material_misc,
+    RETICO_PT_material_misc_outputs,
     RETICO_PT_material_texnode,
     RETICO_PT_material_gltf,
     RETICO_PT_material_fix,
@@ -1217,6 +1304,8 @@ classes = (
     RETICO_OT_material_report_none,
     RETICO_OT_material_report_several,
     RETICO_OT_material_report_users,
+    RETICO_OT_material_outputs_detect,
+    RETICO_OT_material_outputs_activate,
 )
 
 
