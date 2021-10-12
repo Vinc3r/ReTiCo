@@ -765,6 +765,7 @@ def report_several_users():
 def detect_outputs_labels():
     """ Detect all material outputs labels name
     """
+    outputs_labels.clear()
     for mat in bpy.data.materials:
         if mat.use_nodes:
             for node in mat.node_tree.nodes:
@@ -877,7 +878,8 @@ class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):
         row.operator("retico.material_outputs_detect", text="Detect Outputs", icon='VIEWZOOM')
 
         # Show outputs list
-        if len(outputs_labels) < 2:
+        # if len(outputs_labels) < 2:
+        if True == False:
             row = layout.row()
             row.label(text="No custom labels found")
         else:
