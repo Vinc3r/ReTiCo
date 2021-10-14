@@ -870,7 +870,7 @@ class RETICO_PT_material_misc(RETICO_PT_material_3dviewPanel):
         # reload textures
         row = layout.row(align=True)
         row.operator("retico.material_reload_textures",
-                     text="Reload Textures", icon='TEXTURE')
+                     text="Reload Textures", icon='FILE_REFRESH')
 
 
 class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):

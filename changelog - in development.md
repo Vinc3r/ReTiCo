@@ -16,3 +16,7 @@ For Releases'changelogs, see [documentation](https://github.com/Vinc3r/ReTiCo/wi
 
 - meshes names to clipboard is now sort alphabetically
 
+## Misc
+
+- some icons have been added
+

@@ -290,10 +290,12 @@ class RETICO_PT_uv_misc(RETICO_PT_uv_3dviewPanel):
             row.operator("retico.uv_activate_channel", text="2").channel = 1
             # rename channels
             row = layout.row(align=True)
-            row.operator("retico.uv_rename_channel", text="Rename channels")
+            row.operator("retico.uv_rename_channel",
+                         text="Rename channels", icon='SORTALPHA')
             # box mapping
             row = layout.row(align=True)
-            row.operator("retico.uv_box_mapping", text="Box mapping")
+            row.operator("retico.uv_box_mapping",
+                         text="Box mapping", icon='UV_DATA')
             row.prop(context.scene, "retico_box_mapping_size", text="")
 
         else:

@@ -26,19 +26,19 @@ def meshes_names_to_clipboard():
 
     # function core
 
-    ## getting a list, to be able to sort alphabetically
+    # getting a list, to be able to sort alphabetically
     for obj in objects_selected:
         meshes_names_to_list.append(obj.name)
     meshes_names_to_list = sorted(meshes_names_to_list, key=str.lower)
 
-    ## converting all list items to a single string
+    # converting all list items to a single string
     for name in meshes_names_to_list:
         if name is meshes_names_to_list[-1]:
             meshes_names_to_clipboard += f'"{name}"'
         else:
             meshes_names_to_clipboard += f'"{name}", '
 
-    ## sending to clipboard
+    # sending to clipboard
     bpy.context.window_manager.clipboard = meshes_names_to_clipboard
 
     return {'FINISHED'}
@@ -64,7 +64,7 @@ def transfer_names():
 
     # function core
     for obj in objects_selected:
-        obj.data.name = "tmp" # temp name to avoid naming conflict later
+        obj.data.name = "tmp"  # temp name to avoid naming conflict later
 
     for obj in objects_selected:
         obj.data.name = obj.name
@@ -251,12 +251,13 @@ class RETICO_PT_mesh_misc(RETICO_PT_mesh_3dviewPanel):
         ):
             # transfer object name to mesh name
             row = layout.row()
-            row.operator("retico.mesh_transfer_names", text="Transfer names")
+            row.operator("retico.mesh_transfer_names",
+                         text="Transfer names", icon='SORTALPHA')
 
             # copy names to clipboard
             row = layout.row()
             row.operator("retico.mesh_name_to_clipboard",
-                         text="Copy names to clipboard")
+                         text="Copy names to clipboard", icon='COPYDOWN')
 
         else:
             row = layout.row(align=True)
