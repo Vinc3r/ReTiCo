@@ -97,9 +97,8 @@ def set_autosmooth(user_angle=85):
         bpy.context.view_layer.objects.active = obj
         mesh = obj.data
 
-        mesh.use_auto_smooth = True
+        bpy.ops.object.shade_smooth(use_auto_smooth = True)
         mesh.auto_smooth_angle = math.radians(user_angle)
-        bpy.ops.object.shade_smooth()
 
     # handling active object
     bpy.context.view_layer.objects.active = user_active
