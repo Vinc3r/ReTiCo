@@ -897,9 +897,9 @@ class RETICO_PT_material_misc_outputs(RETICO_PT_material_3dviewPanel):
             grid = layout.grid_flow(columns=1, align=True)
             for label in outputs_labels:
                 row = grid.row(align=True)
-                if label is "":
+                if label == "":
                     row.operator("retico.material_outputs_activate",
-                                 text=f"Default (empty)").label = label
+                                 text=f"Default (no label)").label = label
                 else:
                     row.operator("retico.material_outputs_activate",
                                  text=f"{label}").label = label
