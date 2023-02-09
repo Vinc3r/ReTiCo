@@ -810,7 +810,6 @@ class RETICO_PT_material_3dviewPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "ReTiCo"
-    bl_options = {'DEFAULT_CLOSED'}
 
 
 class RETICO_PT_material(RETICO_PT_material_3dviewPanel):
